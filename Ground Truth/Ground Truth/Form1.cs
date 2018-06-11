@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
 using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -30,6 +32,7 @@ namespace Ground_Truth
         }
 
         string file;
+        //Image image;
 
         private void btnProcurar_Click(object sender, EventArgs e)
         {
@@ -42,9 +45,16 @@ namespace Ground_Truth
             }
         }
 
+        private Image resizeImage(Image img, Rectangle area)
+        {
+            Bitmap bitImage = new Bitmap(img);
+            return bitImage.Clone(area, bitImage.PixelFormat);
+        }
+
         private void picImagem_Click(object sender, EventArgs e) {}
 
         private void btnAbrir_Click(object sender, EventArgs e) {
+            imagemOriginal = resizeImage(imagemOriginal, new Rectangle(0, 0, (int)imagemOriginal.Width - (imagemOriginal.Width % 25), (int) imagemOriginal.Height - (imagemOriginal.Height % 25)));
             picImagem.Image = imagemOriginal;
             btnZoomIn.Enabled = true;
             btnZoomOut.Enabled = true;
@@ -54,6 +64,8 @@ namespace Ground_Truth
             if(Convert.ToInt32(txtTamanho.Text) < picImagem.Image.Height && Convert.ToInt32(txtTamanho.Text) < picImagem.Image.Width)
                txtTamanho.Text =Convert.ToString(Convert.ToInt32(txtTamanho.Text) + 1);
         }
+
+
 
         private void btnZoomOut_Click(object sender, EventArgs e) {
             if(Convert.ToInt32(txtTamanho.Text) > 1)
