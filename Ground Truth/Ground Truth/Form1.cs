@@ -83,6 +83,14 @@ namespace Ground_Truth
             }
         }
 
+        private void TxtTamanho_KeyPressed(object sender, KeyEventArgs e) {
+            if(e.KeyCode == Keys.Enter) {
+                newImage = ResizeImage(imagemOriginal, new Rectangle(0, 0, (int)imagemOriginal.Width - (imagemOriginal.Width % Convert.ToInt32(txtTamanho.Text)), (int)imagemOriginal.Height - (imagemOriginal.Height % Convert.ToInt32(txtTamanho.Text))));
+                picImagem.Image = newImage;
+                DrawGrid(newImage);
+            }
+        }
+
         private void BtnZoomIn_Click(object sender, EventArgs e) {
             if(Convert.ToInt32(txtTamanho.Text) < imagemOriginal.Height && Convert.ToInt32(txtTamanho.Text) < imagemOriginal.Width)
                txtTamanho.Text =Convert.ToString(Convert.ToInt32(txtTamanho.Text) + 1);
@@ -90,8 +98,6 @@ namespace Ground_Truth
             picImagem.Image = newImage;
             DrawGrid(newImage);
         }
-
-
 
         public void BtnZoomOut_Click(object sender, EventArgs e) {
             if(Convert.ToInt32(txtTamanho.Text) > 1)

@@ -138,6 +138,7 @@
             this.txtTamanho.Size = new System.Drawing.Size(40, 22);
             this.txtTamanho.TabIndex = 7;
             this.txtTamanho.Text = "25";
+            this.txtTamanho.KeyDown += new System.Windows.Forms.KeyEventHandler(this.TxtTamanho_KeyPressed);
             // 
             // Form1
             // 
