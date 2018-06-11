@@ -62,7 +62,7 @@
             this.btnZoomIn.TabIndex = 1;
             this.btnZoomIn.Text = "+";
             this.btnZoomIn.UseVisualStyleBackColor = true;
-            this.btnZoomIn.Click += new System.EventHandler(this.btnZoomIn_Click);
+            this.btnZoomIn.Click += new System.EventHandler(this.BtnZoomIn_Click);
             // 
             // btnZoomOut
             // 
@@ -74,7 +74,7 @@
             this.btnZoomOut.TabIndex = 2;
             this.btnZoomOut.Text = "-";
             this.btnZoomOut.UseVisualStyleBackColor = true;
-            this.btnZoomOut.Click += new System.EventHandler(this.btnZoomOut_Click);
+            this.btnZoomOut.Click += new System.EventHandler(this.BtnZoomOut_Click);
             // 
             // txtFile
             // 
@@ -97,12 +97,12 @@
             this.btnProcurar.TabIndex = 4;
             this.btnProcurar.Text = "...";
             this.btnProcurar.UseVisualStyleBackColor = true;
-            this.btnProcurar.Click += new System.EventHandler(this.btnProcurar_Click);
+            this.btnProcurar.Click += new System.EventHandler(this.BtnProcurar_Click);
             // 
             // openFileDialog1
             // 
             this.openFileDialog1.Filter = "Imagem JPG| *.jpg";
-            this.openFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.openFileDialog1_FileOk);
+            this.openFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.OpenFileDialog1_FileOk);
             // 
             // btnAbrir
             // 
@@ -114,7 +114,7 @@
             this.btnAbrir.TabIndex = 5;
             this.btnAbrir.Text = "Abrir";
             this.btnAbrir.UseVisualStyleBackColor = true;
-            this.btnAbrir.Click += new System.EventHandler(this.btnAbrir_Click);
+            this.btnAbrir.Click += new System.EventHandler(this.BtnAbrir_Click);
             // 
             // picImagem
             // 
@@ -127,7 +127,7 @@
             this.picImagem.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.picImagem.TabIndex = 6;
             this.picImagem.TabStop = false;
-            this.picImagem.Click += new System.EventHandler(this.picImagem_Click);
+            this.picImagem.Click += new System.EventHandler(this.PicImagem_Click);
             // 
             // txtTamanho
             // 

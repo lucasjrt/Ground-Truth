@@ -16,25 +16,25 @@ namespace Ground_Truth
     {
         Image imagemOriginal, newImage;
         Bitmap bitImage;
+        Pen blackPen;
 
         public Form1()
         {
             InitializeComponent();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-
+        private void Form1_Load(object sender, EventArgs e) {
+            blackPen = new Pen(Color.White, 3);
         }
 
-        private void openFileDialog1_FileOk(object sender, CancelEventArgs e)
+        private void OpenFileDialog1_FileOk(object sender, CancelEventArgs e)
         {
 
         }
 
         string file;
 
-        private void btnProcurar_Click(object sender, EventArgs e)
+        private void BtnProcurar_Click(object sender, EventArgs e)
         {
             if (openFileDialog1.ShowDialog() == DialogResult.OK)
             {
@@ -45,46 +45,60 @@ namespace Ground_Truth
             }
         }
 
-        private Image resizeImage(Image img, Rectangle area)
+        private Image ResizeImage(Image img, Rectangle area)
         {
+            if(bitImage != null)
+                bitImage.Dispose();
+            GC.Collect();
             bitImage = new Bitmap(img);
             return bitImage.Clone(area, bitImage.PixelFormat);
         }
 
-        private void picImagem_Click(object sender, EventArgs e) {}
+        private void PicImagem_Click(object sender, EventArgs e) {}
 
-        private void btnAbrir_Click(object sender, EventArgs e) {
-            newImage = resizeImage(imagemOriginal, new Rectangle(0, 0, (int)imagemOriginal.Width - (imagemOriginal.Width % Convert.ToInt32(txtTamanho.Text)), (int) imagemOriginal.Height - (imagemOriginal.Height % Convert.ToInt32(txtTamanho.Text))));
+        private void BtnAbrir_Click(object sender, EventArgs e) {
+            newImage = ResizeImage(imagemOriginal, new Rectangle(0, 0, (int)imagemOriginal.Width - (imagemOriginal.Width % Convert.ToInt32(txtTamanho.Text)), (int) imagemOriginal.Height - (imagemOriginal.Height % Convert.ToInt32(txtTamanho.Text))));
             picImagem.Image = newImage;
             btnZoomIn.Enabled = true;
             btnZoomOut.Enabled = true;
-            drawGrid(imagemOriginal);
+            DrawGrid(newImage);
         }
         
-        private void drawLine(Image image)
-        {
-
+        private void DrawLine(Image image, int x, int y, int width, int height) {
+            using (var graphics = Graphics.FromImage(image)) {
+                graphics.DrawLine(blackPen, x, y, width, height);
+            }
         }
 
-        private void drawGrid(Image image)
-        {
+        private void DrawGrid(Image image) {
+            var tam = Convert.ToInt32(txtTamanho.Text);
+            var w = image.Width / tam;
+            var h = image.Height / tam;
 
+            for (int i = 0; i < w; i++) {
+                DrawLine(image, tam + i * tam, 0, tam + i * tam, image.Height);
+            }
+            for (int i = 0; i < h; i++) {
+                DrawLine(image, 0, tam + i * tam, image.Width, tam + i * tam);
+            }
         }
 
-        private void btnZoomIn_Click(object sender, EventArgs e) {
+        private void BtnZoomIn_Click(object sender, EventArgs e) {
             if(Convert.ToInt32(txtTamanho.Text) < imagemOriginal.Height && Convert.ToInt32(txtTamanho.Text) < imagemOriginal.Width)
                txtTamanho.Text =Convert.ToString(Convert.ToInt32(txtTamanho.Text) + 1);
-            newImage = resizeImage(imagemOriginal, new Rectangle(0, 0, (int)imagemOriginal.Width - (imagemOriginal.Width % Convert.ToInt32(txtTamanho.Text)), (int)imagemOriginal.Height - (imagemOriginal.Height % Convert.ToInt32(txtTamanho.Text))));
+            newImage = ResizeImage(imagemOriginal, new Rectangle(0, 0, (int)imagemOriginal.Width - (imagemOriginal.Width % Convert.ToInt32(txtTamanho.Text)), (int)imagemOriginal.Height - (imagemOriginal.Height % Convert.ToInt32(txtTamanho.Text))));
             picImagem.Image = newImage;
+            DrawGrid(newImage);
         }
 
 
 
-        private void btnZoomOut_Click(object sender, EventArgs e) {
+        public void BtnZoomOut_Click(object sender, EventArgs e) {
             if(Convert.ToInt32(txtTamanho.Text) > 1)
                 txtTamanho.Text = Convert.ToString(Convert.ToInt32(txtTamanho.Text) - 1);
-            newImage = resizeImage(imagemOriginal, new Rectangle(0, 0, (int)imagemOriginal.Width - (imagemOriginal.Width % Convert.ToInt32(txtTamanho.Text)), (int)imagemOriginal.Height - (imagemOriginal.Height % Convert.ToInt32(txtTamanho.Text))));
+            newImage = ResizeImage(imagemOriginal, new Rectangle(0, 0, (int)imagemOriginal.Width - (imagemOriginal.Width % Convert.ToInt32(txtTamanho.Text)), (int)imagemOriginal.Height - (imagemOriginal.Height % Convert.ToInt32(txtTamanho.Text))));
             picImagem.Image = newImage;
+            DrawGrid(newImage);
         }
     }
 }
