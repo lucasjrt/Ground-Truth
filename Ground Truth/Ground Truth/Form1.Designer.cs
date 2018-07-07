@@ -127,7 +127,7 @@
             this.picImagem.SizeMode = System.Windows.Forms.PictureBoxSizeMode.StretchImage;
             this.picImagem.TabIndex = 6;
             this.picImagem.TabStop = false;
-            this.picImagem.Click += new System.EventHandler(this.PicImagem_Click);
+            this.picImagem.MouseClick += new System.Windows.Forms.MouseEventHandler(this.PicImagem_Click);
             // 
             // txtTamanho
             // 
