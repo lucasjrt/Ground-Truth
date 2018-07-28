@@ -77,14 +77,14 @@ namespace Ground_Truth {
             // 
             // picBoxImage
             // 
-            this.picBoxImage.Image = global::Ground_Truth.Properties.Resources.DJI_0007;
+            this.picBoxImage.Enabled = false;
             this.picBoxImage.Location = new System.Drawing.Point(0, 0);
             this.picBoxImage.Name = "picBoxImage";
-            this.picBoxImage.Size = new System.Drawing.Size(4864, 3648);
+            this.picBoxImage.Size = new System.Drawing.Size(30, 30);
             this.picBoxImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.picBoxImage.TabIndex = 6;
             this.picBoxImage.TabStop = false;
-            this.picBoxImage.Click += new System.EventHandler(this.pictureBox1_Click);
+            this.picBoxImage.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseUp);
             // 
             // panel1
             // 
@@ -101,23 +101,24 @@ namespace Ground_Truth {
             // cbGridSize
             // 
             this.cbGridSize.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbGridSize.Enabled = false;
             this.cbGridSize.FormattingEnabled = true;
             this.cbGridSize.Items.AddRange(new object[] {
             "25",
             "50",
             "80"});
-            this.cbGridSize.Location = new System.Drawing.Point(679, 518);
+            this.cbGridSize.Location = new System.Drawing.Point(720, 518);
             this.cbGridSize.Name = "cbGridSize";
-            this.cbGridSize.Size = new System.Drawing.Size(91, 24);
+            this.cbGridSize.Size = new System.Drawing.Size(50, 24);
             this.cbGridSize.TabIndex = 8;
-            this.cbGridSize.Text = "Selecionar";
+            this.cbGridSize.Text = "25";
             this.cbGridSize.SelectedIndexChanged += new System.EventHandler(this.cbGridSize_SelectedIndexChanged);
             // 
             // label1
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(553, 521);
+            this.label1.Location = new System.Drawing.Point(594, 521);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(120, 17);
             this.label1.TabIndex = 9;
