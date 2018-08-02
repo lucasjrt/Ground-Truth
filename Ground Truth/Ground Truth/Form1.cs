@@ -9,7 +9,8 @@ namespace Ground_Truth {
         Bitmap mainImage; //Imagem principal, não é alterada
         Pen pen; // "Caneta" usada para desenhar o grid
         int gridSize = 25; //25 = Default
-        string file; // diretório da imagem
+        int w, h; // Width, Height - Dimensões da imagem redimensionada
+        string file; // Diretório da imagem
         string read; // Linha lida do arquivo
         Graphics g;
 
@@ -24,45 +25,49 @@ namespace Ground_Truth {
         int isize, jsize; // Dimensões da matriz
 
         /* Formato do arquivo:
-         * Linha 1 isize // largura da matriz
-         * Linha 2 jsize // altura da matriz
+         * Linha 1 isize // altura da matriz
+         * Linha 2 jsize // largura da matriz
          * Linha 3 valores...
          * Linha n valores...
          */
-        string datfile;
+        string datfile; // Caminho do arquivo de dados
 
-        //Construtor
         public Form1() {
             InitializeComponent();
         }
 
         //Tratador do evento de clique na imagem
-        private void pictureBox1_MouseUp(object sender, MouseEventArgs e) {
+        private void PictureBox1_MouseUp(object sender, MouseEventArgs e) {
             int i = (int) (e.Y / gridSize), j = (int) (e.X / gridSize);
-            Console.WriteLine("X: " + i + ", Y: " + j);
-            if(mat[i,j]  < 3) {
-                mat[i, j]++;
-            } else {
-                mat[i, j] = 0;
-            }
-            picBoxImage.Image = paintImageSquare(picBoxImage.Image, gridSize, mat[i, j], j, i);
+            if(e.Button == MouseButtons.Left) // Se o clique for com o botão esquerdo, troca a cor pra frente
+                if (mat[i, j] < 3)
+                    mat[i, j]++;
+                else
+                    mat[i, j] = 0;
+            else if(e.Button == MouseButtons.Right) // Se o clique for com o botão direito, troca a cor pra trás
+                if (mat[i, j] > 0)
+                    mat[i, j]--;
+                else
+                    mat[i, j] = 3;
+            PaintImageSquare(i, j);
+            UpdateMatrix(mat[i, j], i, j);
+            GC.Collect();
         }
 
-        //Parâmetros: Imagem, tamanho do quadrado, cor (valor na matriz), posição (i, j)
-        private Bitmap paintImageSquare(Image image, int size, int color, int i, int j) {
-            Console.WriteLine("Color = " + color);
-            Bitmap newImage = new Bitmap(image);
-            int r, g, b, xPos, yPos, increaseRatio = 100, decreaseRatio = 100;
+        // Colore um quadrado da posição (i, j) até a posição (i + gridSize, j + gridSize)
+        private void PaintImageSquare(int i, int j) {
+            Bitmap newImage = new Bitmap(picBoxImage.Image);
+            int r, g, b, xPos, yPos, increaseRatio = 100, decreaseRatio = 100; // increaseRatio / decreaseRatio - Taxa de alteração de cor
             Color c;
 
-            for(int x = 1; x < size; x++) {
-                for (int y = 1; y < size; y++) {
-                    xPos = j * gridSize + y;
-                    yPos = i * gridSize + x;
+            for(int y = 1; y < gridSize; y++) {
+                for (int x = 1; x < gridSize; x++) {
+                    xPos = i * gridSize + x;
+                    yPos = j * gridSize + y;
                     r = mainImage.GetPixel(yPos, xPos).R;
                     g = mainImage.GetPixel(yPos, xPos).G;
                     b = mainImage.GetPixel(yPos, xPos).B;
-                    switch (color) {
+                    switch (mat[i,j]) {
                         case 0: // Indefinido - Não muda a cor
                             c = mainImage.GetPixel(yPos, xPos);
                             newImage.SetPixel(yPos, xPos, c);
@@ -79,18 +84,62 @@ namespace Ground_Truth {
                             c = Color.FromArgb(255, Math.Min(r + increaseRatio, 255), Math.Max(g - decreaseRatio, 0), Math.Max(b - decreaseRatio, 0));
                             newImage.SetPixel(yPos, xPos, c);
                             break;
-                        default:
-                            MessageBox.Show("Valor inválido na matriz de dados aqui");
+                        default: // Apenas valores do preset são suportados
+                            MessageBox.Show("Valor inválido na matriz de dados na posição [" + i + "," + j + "]");
                             break;
                     }
                 }
             }
-            return newImage;
+            picBoxImage.Image = newImage;
+        }
+
+        // Colore a imagem se existir o arquivo de dados
+        private void LoadColors() {
+            int r, g, b, xPos, yPos, increaseRatio = 100, decreaseRatio = 100;
+            Color c;
+            Bitmap newImage = new Bitmap(picBoxImage.Image);
+            for (int i = 0; i < isize; i++) { // Percorrendo a matriz
+                for(int j = 0; j < jsize; j++) { 
+                    if(mat[i,j] != 0) { // Só colore o quadrado se necessário
+                        for(int y = 0; y < gridSize; y++) { // Percorrendo os pixels da imagem
+                            for (int x = 0; x < gridSize; x++) {
+                                xPos = i * gridSize + x;
+                                yPos = j * gridSize + y;
+                                r = mainImage.GetPixel(yPos, xPos).R;
+                                g = mainImage.GetPixel(yPos, xPos).G;
+                                b = mainImage.GetPixel(yPos, xPos).B;
+                                switch (mat[i,j]) {
+                                    case 0: // Indefinido - Não muda a cor
+                                        c = mainImage.GetPixel(yPos, xPos);
+                                        newImage.SetPixel(yPos, xPos, c);
+                                        break;
+                                    case 1: // Plantação - Verde
+                                        c = Color.FromArgb(255, Math.Max(r - decreaseRatio, 0), Math.Min(g + increaseRatio, 255), Math.Max(b - decreaseRatio, 0));
+                                        newImage.SetPixel(yPos, xPos, c);
+                                        break;
+                                    case 2: // Ambos - Amarelo
+                                        c = Color.FromArgb(255, Math.Min(r + increaseRatio, 255), Math.Min(g + increaseRatio, 255), Math.Max(b - decreaseRatio, 0));
+                                        newImage.SetPixel(yPos, xPos, c);
+                                        break;
+                                    case 3: // Não plantação - Vermelho
+                                        c = Color.FromArgb(255, Math.Min(r + increaseRatio, 255), Math.Max(g - decreaseRatio, 0), Math.Max(b - decreaseRatio, 0));
+                                        newImage.SetPixel(yPos, xPos, c);
+                                        break;
+                                    default:
+                                        MessageBox.Show("Valor inválido na matriz de dados na posição [" + i + "," + j + "]");
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            picBoxImage.Image = newImage;
+            GC.Collect();
         }
 
         //Função chamada quando é clicado OK na janela de diálogo de abrir o arquivo
-        private void openFileDialog1_FileOk(object sender, CancelEventArgs e) {
-            int w, h; //width, height - Largura e altura da imagem
+        private void OpenFileDialog1_FileOk(object sender, CancelEventArgs e) {
             file = openFileDialog1.FileName; // atribuindo a localização da imagem
             mainImage = new Bitmap(Image.FromFile(file));
             w = mainImage.Width;
@@ -116,21 +165,21 @@ namespace Ground_Truth {
             else
                 picBoxImage.Image = new Bitmap(CropImage(mainImage, new Rectangle(0, 0, w, h)));
 
-            drawGrid();
             cbGridSize.Enabled = true;
-            startMatrix(); // Inicia a matriz com o tamanho de gridSize
+            if(StartMatrix())
+                LoadColors(); // Colore a imagem conforme a matriz de dados
+            DrawGrid();
         }
 
         //Tratador de eventos de quando clica no botão "..."
-        private void btnSearch_Click(object sender, EventArgs e) {
+        private void BtnSearch_Click(object sender, EventArgs e) {
             if (openFileDialog1.ShowDialog() == DialogResult.OK) {
                 txtDirectory.Text = openFileDialog1.FileName;
             }
         }
 
         //Tratador de eventos de quando clica no botão "Abrir"
-        private void btnOpen_Click(object sender, EventArgs e) {
-            int w, h; //width, height - Largura e altura da imagem
+        private void BtnOpen_Click(object sender, EventArgs e) {
             try {
                 if (mainImage != null) // Se a imagem principal já tem uma instância
                     mainImage.Dispose(); // Descarta essa instância, por motivos de memória
@@ -147,10 +196,11 @@ namespace Ground_Truth {
                     picBoxImage.Image = new Bitmap(mainImage);
                 else
                     picBoxImage.Image = new Bitmap(CropImage(mainImage, new Rectangle(0, 0, w, h))); 
-                drawGrid();
                 GC.Collect(); //Garbage collector
                 cbGridSize.Enabled = true;
-                startMatrix();
+                if (StartMatrix())
+                    LoadColors();
+                DrawGrid();
             } catch (System.IO.FileNotFoundException) { //Exceção de quando não é possível encontrar o arquivo
                 MessageBox.Show("Não foi possível localizar o arquivo " + txtDirectory.Text);
             } catch (System.NullReferenceException) { // Exceção de quando a imagem é inválida
@@ -159,10 +209,9 @@ namespace Ground_Truth {
         }
 
         // Função que desenha o grid
-        private void drawGrid() {
+        private void DrawGrid() {
             if (gridSize <= 0) // O grid não pode ter tamanho 0 nem valores negativos
                 return;
-            Console.WriteLine("Drawing grid of size " + gridSize.ToString()); // Debug line
             pen = new Pen(Color.White); // Atribui a cor do grid
             g = Graphics.FromImage(picBoxImage.Image); // Onde vai ser desenhado o grid
             for (int i = 0; i < picBoxImage.Height || i < picBoxImage.Width; i += gridSize) { // Loop para desenhar o grid
@@ -181,10 +230,9 @@ namespace Ground_Truth {
         }
 
         // Tratador de eventos de quando o tamanho do grid é alterado
-        private void cbGridSize_SelectedIndexChanged(object sender, EventArgs e) {
+        private void CbGridSize_SelectedIndexChanged(object sender, EventArgs e) {
             int w, h;
             gridSize = Convert.ToInt32(cbGridSize.Text); // Altera a variável global do tamanho do grid
-            Console.WriteLine("gridSize: " + gridSize.ToString());
 
             w = mainImage.Width - (mainImage.Width % gridSize); // calcula nova largura da imagem
             h = mainImage.Height - (mainImage.Height % gridSize); //calcula nova altura da imagem
@@ -194,127 +242,97 @@ namespace Ground_Truth {
             else
                 picBoxImage.Image = new Bitmap(CropImage(mainImage, new Rectangle(0, 0, w, h)));
 
-            drawGrid();
-            startMatrix();
+            if (StartMatrix())
+                LoadColors();
+            DrawGrid();
         }
 
-        private void updateMatrix(int value, int x, int y) {
-            if (mat == null) {
-                Console.WriteLine("A matriz de dados não existia, criando uma nova matriz");
-                startMatrix();
-            }
+        // Atualiza a matriz no disco
+        private void UpdateMatrix(int value, int x, int y) {
+            if (mat == null)
+                StartMatrix();
+
             mat[x, y] = value;
-            File.Delete(datfile);
-            startMatrix();
+            if (File.Exists(datfile)) {
+                File.Delete(datfile);
+                using (StreamWriter writeText = new StreamWriter(datfile)) {
+                    writeText.WriteLine(isize);
+                    writeText.WriteLine(jsize);
+                    for (int i = 0; i < isize; i++) {
+                        for (int j = 0; j < jsize; j++) {
+                            Console.Write(mat[i, j]);
+                            writeText.Write(mat[i, j]);
+                        }
+                        writeText.WriteLine();
+                    }
+                }
+            } else {
+                MessageBox.Show("Não foi encontrado o arquivo de dados para ser atualizado, feche e abra novamente o Ground Truth");
+            }
         }
 
-        private void startMatrix() {
-            if(mat != null && gridSize != picBoxImage.Width / isize) {
-                Console.WriteLine("Mudando o tamanho da matriz");
+        /*
+         * Inicializa a matriz com os valores do arquivo
+         * de dados, caso o arquivo não exista, cria-se 
+         * um novo arquivo com a matriz completamente zerada
+         * 
+         * Retorna true caso a matriz já existe, e falso 
+         * se a matriz teve que ser criada
+         */
+        private bool StartMatrix() {
+            bool exists = false;
+            gridSize = Convert.ToInt32(cbGridSize.Text);
+
+            if(mat != null) {
                 mat = null;
                 GC.Collect();
             }
                 
+            // Verificação do nome que o arquivo terá
             switch (gridSize) {
                 case 25:
                     datfile = file.Substring(0, file.Length - 4) + "_25.dat";
-                    // Se o arquivo existir, ler do arquivo, se não, criar o arquivo
-                    if (File.Exists(datfile)) {
-                        using (StreamReader readText = new StreamReader(datfile)) {
-                            isize = Convert.ToInt32(readText.ReadLine());
-                            jsize = Convert.ToInt32(readText.ReadLine());
-                            mat = new int[isize, jsize];
-                            for (int i = 0; i < isize; i++) {
-                                read = readText.ReadLine();
-                                Console.WriteLine(read);
-                                for (int j = 0; j < jsize; j++) {
-                                    mat[i, j] = read[j];
-                                }
-                            }
-                        }
-                    } else {
-                        using (StreamWriter writeText = new StreamWriter(datfile)) {
-                            isize = picBoxImage.Image.Height / 25;
-                            jsize = picBoxImage.Image.Width / 25;
-                            mat = new int[isize, jsize];
-                            writeText.WriteLine(isize.ToString());
-                            writeText.WriteLine(jsize.ToString());
-                            for (int i = 0; i < isize; i++) {
-                                for (int j = 0; j < jsize; j++) {
-                                    writeText.Write(mat[i, j].ToString());
-                                }
-                                writeText.WriteLine();
-                            }
-                        }
-                    }
                     break;
                 case 50:
                     datfile = file.Substring(0, file.Length - 4) + "_50.dat";
-                    if (File.Exists(datfile)) {
-                        using (StreamReader readText = new StreamReader(datfile)) {
-                            isize = Convert.ToInt32(readText.ReadLine());
-                            jsize = Convert.ToInt32(readText.ReadLine());
-                            mat = new int[isize, jsize];
-                            for (int i = 0; i < isize; i++) {
-                                read = readText.ReadLine();
-
-                                for (int j = 0; j < jsize; j++) {
-                                    mat[i, j] = read[j];
-                                }
-                            }
-                        }
-                    } else {
-                        using (StreamWriter writeText = new StreamWriter(datfile)) {
-                            isize = picBoxImage.Image.Height / 50;
-                            jsize = picBoxImage.Image.Width / 50;
-                            mat = new int[isize, jsize];
-                            writeText.WriteLine(isize.ToString());
-                            writeText.WriteLine(jsize.ToString());
-                            for (int i = 0; i < isize; i++) {
-                                for (int j = 0; j < jsize; j++) {
-                                    writeText.Write(mat[i, j].ToString());
-                                }
-                                writeText.WriteLine();
-                            }
-                        }
-                    }
                     break;
                 case 80:
                     datfile = file.Substring(0, file.Length - 4) + "_80.dat";
-                    if (File.Exists(datfile)) {
-                        using (StreamReader readText = new StreamReader(datfile)) {
-                            isize = Convert.ToInt32(readText.ReadLine());
-                            jsize = Convert.ToInt32(readText.ReadLine());
-                            mat = new int[isize, jsize];
-                            for (int i = 0; i < isize; i++) {
-                                read = readText.ReadLine();
-
-                                for (int j = 0; j < jsize; j++) {
-                                    mat[i, j] = read[j];
-                                }
-                            }
-                        }
-                    } else {
-                        using (StreamWriter writeText = new StreamWriter(datfile)) {
-                            isize = picBoxImage.Image.Height / 80;
-                            jsize = picBoxImage.Image.Width / 80;
-                            mat = new int[jsize, jsize];
-                            writeText.WriteLine(isize.ToString());
-                            writeText.WriteLine(jsize.ToString());
-                            for (int i = 0; i < isize; i++) {
-                                for (int j = 0; j < jsize; j++) {
-                                    writeText.Write(mat[i, j].ToString());
-                                }
-                                writeText.WriteLine();
-                            }
-                        }
-                    }
-                    break;
-                default:
-                    MessageBox.Show("Tamanho do grid invalido");
                     break;
             }
+
+            // Dimensões da matriz
+            isize = picBoxImage.Image.Height / gridSize; 
+            jsize = picBoxImage.Image.Width/ gridSize;
+
+            // Se o arquivo existir, ler do arquivo, se não, criar o arquivo
+            if (File.Exists(datfile)) {
+                exists = true;
+                using (StreamReader readText = new StreamReader(datfile)) {
+                    isize = Convert.ToInt32(readText.ReadLine());
+                    jsize = Convert.ToInt32(readText.ReadLine());
+                    mat = new int[isize, jsize];
+                    for (int i = 0; i < isize; i++) {
+                        read = readText.ReadLine();
+                        for (int j = 0; j < jsize; j++) {
+                            mat[i, j] = Convert.ToInt32(Convert.ToString(read[j]));
+                        }
+                    }
+                }
+            } else {
+                using (StreamWriter writeText = new StreamWriter(datfile)) {
+                    mat = new int[isize, jsize];
+                    writeText.WriteLine(isize.ToString());
+                    writeText.WriteLine(jsize.ToString());
+                    for (int i = 0; i < isize; i++) {
+                        for (int j = 0; j < jsize; j++) {
+                            writeText.Write(mat[i, j].ToString());
+                        }
+                        writeText.WriteLine();
+                    }
+                }
+            }
+            return exists;
         }
-    }
-        
+    }    
 }

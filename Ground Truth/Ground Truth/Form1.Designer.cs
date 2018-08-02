@@ -57,7 +57,7 @@ namespace Ground_Truth {
             this.btnSearch.TabIndex = 1;
             this.btnSearch.Text = "...";
             this.btnSearch.UseVisualStyleBackColor = true;
-            this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
+            this.btnSearch.Click += new System.EventHandler(this.BtnSearch_Click);
             // 
             // btnOpen
             // 
@@ -68,12 +68,12 @@ namespace Ground_Truth {
             this.btnOpen.TabIndex = 2;
             this.btnOpen.Text = "Abrir";
             this.btnOpen.UseVisualStyleBackColor = true;
-            this.btnOpen.Click += new System.EventHandler(this.btnOpen_Click);
+            this.btnOpen.Click += new System.EventHandler(this.BtnOpen_Click);
             // 
             // openFileDialog1
             // 
             this.openFileDialog1.Filter = "Imagem JPG|*.jpg";
-            this.openFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.openFileDialog1_FileOk);
+            this.openFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.OpenFileDialog1_FileOk);
             // 
             // picBoxImage
             // 
@@ -84,7 +84,7 @@ namespace Ground_Truth {
             this.picBoxImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.picBoxImage.TabIndex = 6;
             this.picBoxImage.TabStop = false;
-            this.picBoxImage.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseUp);
+            this.picBoxImage.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PictureBox1_MouseUp);
             // 
             // panel1
             // 
@@ -112,7 +112,7 @@ namespace Ground_Truth {
             this.cbGridSize.Size = new System.Drawing.Size(50, 24);
             this.cbGridSize.TabIndex = 8;
             this.cbGridSize.Text = "25";
-            this.cbGridSize.SelectedIndexChanged += new System.EventHandler(this.cbGridSize_SelectedIndexChanged);
+            this.cbGridSize.SelectedIndexChanged += new System.EventHandler(this.CbGridSize_SelectedIndexChanged);
             // 
             // label1
             // 
