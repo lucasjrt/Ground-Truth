@@ -34,6 +34,8 @@ namespace Ground_Truth {
             this.panel1 = new System.Windows.Forms.Panel();
             this.cbGridSize = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
+            this.label2 = new System.Windows.Forms.Label();
+            this.cbZoom = new System.Windows.Forms.ComboBox();
             ((System.ComponentModel.ISupportInitialize)(this.picBoxImage)).BeginInit();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -57,7 +59,7 @@ namespace Ground_Truth {
             this.btnSearch.TabIndex = 1;
             this.btnSearch.Text = "...";
             this.btnSearch.UseVisualStyleBackColor = true;
-            this.btnSearch.Click += new System.EventHandler(this.btnSearch_Click);
+            this.btnSearch.Click += new System.EventHandler(this.BtnSearch_Click);
             // 
             // btnOpen
             // 
@@ -68,23 +70,22 @@ namespace Ground_Truth {
             this.btnOpen.TabIndex = 2;
             this.btnOpen.Text = "Abrir";
             this.btnOpen.UseVisualStyleBackColor = true;
-            this.btnOpen.Click += new System.EventHandler(this.btnOpen_Click);
+            this.btnOpen.Click += new System.EventHandler(this.BtnOpen_Click);
             // 
             // openFileDialog1
             // 
-            this.openFileDialog1.Filter = "Imagem JPG|*.jpg";
-            this.openFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.openFileDialog1_FileOk);
+            this.openFileDialog1.Filter = "Imagem JPG|*.jpg|Imagem PNG|*.png";
+            this.openFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.OpenFileDialog1_FileOk);
             // 
             // picBoxImage
             // 
-            this.picBoxImage.Enabled = false;
             this.picBoxImage.Location = new System.Drawing.Point(0, 0);
             this.picBoxImage.Name = "picBoxImage";
             this.picBoxImage.Size = new System.Drawing.Size(30, 30);
             this.picBoxImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.picBoxImage.TabIndex = 6;
             this.picBoxImage.TabStop = false;
-            this.picBoxImage.MouseUp += new System.Windows.Forms.MouseEventHandler(this.pictureBox1_MouseUp);
+            this.picBoxImage.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PictureBox1_MouseUp);
             // 
             // panel1
             // 
@@ -112,23 +113,52 @@ namespace Ground_Truth {
             this.cbGridSize.Size = new System.Drawing.Size(50, 24);
             this.cbGridSize.TabIndex = 8;
             this.cbGridSize.Text = "25";
-            this.cbGridSize.SelectedIndexChanged += new System.EventHandler(this.cbGridSize_SelectedIndexChanged);
+            this.cbGridSize.SelectedIndexChanged += new System.EventHandler(this.CbGridSize_SelectedIndexChanged);
             // 
             // label1
             // 
             this.label1.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.label1.AutoSize = true;
-            this.label1.Location = new System.Drawing.Point(594, 521);
+            this.label1.Location = new System.Drawing.Point(594, 522);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(120, 17);
             this.label1.TabIndex = 9;
             this.label1.Text = "Tamanho do grid:";
+            // 
+            // label2
+            // 
+            this.label2.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(481, 522);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(52, 17);
+            this.label2.TabIndex = 10;
+            this.label2.Text = "Zoom: ";
+            // 
+            // cbZoom
+            // 
+            this.cbZoom.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
+            this.cbZoom.Enabled = false;
+            this.cbZoom.FormattingEnabled = true;
+            this.cbZoom.Items.AddRange(new object[] {
+            "1x",
+            "2x",
+            "4x",
+            "8x"});
+            this.cbZoom.Location = new System.Drawing.Point(532, 519);
+            this.cbZoom.Name = "cbZoom";
+            this.cbZoom.Size = new System.Drawing.Size(49, 24);
+            this.cbZoom.TabIndex = 11;
+            this.cbZoom.Text = "1x";
+            this.cbZoom.SelectedIndexChanged += new System.EventHandler(this.ComboBox1_SelectedIndexChanged);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(782, 553);
+            this.Controls.Add(this.cbZoom);
+            this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.cbGridSize);
             this.Controls.Add(this.panel1);
@@ -156,6 +186,8 @@ namespace Ground_Truth {
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.ComboBox cbGridSize;
         private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox cbZoom;
     }
 }
 
