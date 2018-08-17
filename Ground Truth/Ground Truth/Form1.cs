@@ -107,8 +107,8 @@ namespace Ground_Truth {
                     if(mat[i,j] != 0) { // Só colore o quadrado se necessário
                         for(int y = 0; y < gridSize * zoom; y++) { // Percorrendo os pixels da imagem
                             for (int x = 0; x < gridSize * zoom; x++) {
-                                xPos = (int) (i/zoom) * gridSize * zoom + x;
-                                yPos = (int) (j/zoom) * gridSize * zoom + y;
+                                xPos = i * gridSize * zoom + x;
+                                yPos = j * gridSize * zoom + y;
                                 r = zoomImage.GetPixel(yPos, xPos).R;
                                 g = zoomImage.GetPixel(yPos, xPos).G;
                                 b = zoomImage.GetPixel(yPos, xPos).B;

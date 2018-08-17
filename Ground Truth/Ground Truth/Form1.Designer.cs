@@ -142,9 +142,7 @@ namespace Ground_Truth {
             this.cbZoom.FormattingEnabled = true;
             this.cbZoom.Items.AddRange(new object[] {
             "1x",
-            "2x",
-            "4x",
-            "8x"});
+            "2x"});
             this.cbZoom.Location = new System.Drawing.Point(532, 519);
             this.cbZoom.Name = "cbZoom";
             this.cbZoom.Size = new System.Drawing.Size(49, 24);
