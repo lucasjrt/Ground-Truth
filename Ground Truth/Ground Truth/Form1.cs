@@ -13,6 +13,10 @@ namespace Ground_Truth {
         string file; // Diretório da imagem
         string read; // Linha lida do arquivo
         Graphics g;
+        int increaseRatio = 100, decreaseRatio = 100; // increaseRatio / decreaseRatio - Taxa de alteração de cor
+
+        bool ctrl_pressed = false;
+        Point first;
 
         /*
          * Matriz de informação:
@@ -38,26 +42,53 @@ namespace Ground_Truth {
 
         //Tratador do evento de clique na imagem
         private void PictureBox1_MouseUp(object sender, MouseEventArgs e) {
+            
+            
             int i = (int) (e.Y / gridSize), j = (int) (e.X / gridSize);
-            if(e.Button == MouseButtons.Left) // Se o clique for com o botão esquerdo, troca a cor pra frente
+
+            if (e.Button == MouseButtons.Left) // Se o clique for com o botão esquerdo, troca a cor pra frente
                 if (mat[i, j] < 3)
                     mat[i, j]++;
                 else
                     mat[i, j] = 0;
-            else if(e.Button == MouseButtons.Right) // Se o clique for com o botão direito, troca a cor pra trás
+             else if (e.Button == MouseButtons.Right) // Se o clique for com o botão direito, troca a cor pra trás
                 if (mat[i, j] > 0)
                     mat[i, j]--;
                 else
                     mat[i, j] = 3;
-            PaintImageSquare(i, j);
-            UpdateMatrix(mat[i, j], i, j);
+
+            if (Control.ModifierKeys == Keys.Control && !ctrl_pressed) {
+                ctrl_pressed = true;
+                first = new Point(j, i);
+                PaintImageSquare(i, j);
+                UpdateMatrix(mat[i, j], i, j);
+                Console.WriteLine("Posicao (" + first.Y + "," + first.X + ") selecionada");
+            } else if (Control.ModifierKeys == Keys.Control & ctrl_pressed) {
+                Console.WriteLine("Colorindo ");
+                for(int y = first.Y; y <= first.Y + Math.Abs(first.Y - i); y++) {
+                    for(int x = first.X; x <= first.X + Math.Abs(first.X - j); x++) {
+                        UpdateMatrix(mat[first.Y, first.X], y, x);
+                        Console.WriteLine("Alterando mat[" + x + "," + y + "] para " + mat[first.Y, first.X]);
+                    }
+                }
+                Console.WriteLine("X = " + first.X + ", Y = " + first.Y + " = " + mat[first.Y, first.X]);
+                Console.WriteLine("J = " + j + ", I = " + i);
+                PaintImageRectangle(first.Y, first.X, i, j);
+                ctrl_pressed = false;
+                Console.WriteLine("Colorindo retângulo de (" + first.Y + "," + first.X + ") até (" + j + "," + i + ")");
+            } else {
+                ctrl_pressed = false;
+                PaintImageSquare(i, j);
+                Console.WriteLine("Cancelando o retângulo");
+                UpdateMatrix(mat[i, j], i, j);
+            }
             GC.Collect();
         }
 
         // Colore um quadrado da posição (i, j) até a posição (i + gridSize, j + gridSize)
         private void PaintImageSquare(int i, int j) {
             Bitmap newImage = new Bitmap(picBoxImage.Image);
-            int r, g, b, xPos, yPos, increaseRatio = 100, decreaseRatio = 100; // increaseRatio / decreaseRatio - Taxa de alteração de cor
+            int r, g, b, xPos, yPos;
             Color c;
 
             for(int y = 1; y < gridSize; y++) {
@@ -86,6 +117,46 @@ namespace Ground_Truth {
                             break;
                         default: // Apenas valores do preset são suportados
                             MessageBox.Show("Valor inválido na matriz de dados na posição [" + i + "," + j + "]");
+                            break;
+                    }
+                }
+            }
+            picBoxImage.Image = newImage;
+        }
+
+        private void PaintImageRectangle(int i0, int j0, int i1, int j1) {
+            Bitmap newImage = new Bitmap(picBoxImage.Image);
+            int r, g, b, xPos, yPos;
+            Color c;
+
+            for (int y = 1; y < gridSize * (Math.Abs(j1 - j0) + 1); y++) {
+                for (int x = 1; x < gridSize * (Math.Abs(i1 - i0) + 1); x++) {
+                    if (x % 25 == 0 || y % 25 == 0)
+                        continue;
+                    xPos = i0 * gridSize + x;
+                    yPos = j0 * gridSize + y;
+                    r = mainImage.GetPixel(yPos, xPos).R;
+                    g = mainImage.GetPixel(yPos, xPos).G;
+                    b = mainImage.GetPixel(yPos, xPos).B;
+                    switch (mat[i0, j0]) {
+                        case 0: // Indefinido - Não muda a cor
+                            c = mainImage.GetPixel(yPos, xPos);
+                            newImage.SetPixel(yPos, xPos, c);
+                            break;
+                        case 1: // Plantação - Verde
+                            c = Color.FromArgb(255, Math.Max(r - decreaseRatio, 0), Math.Min(g + increaseRatio, 255), Math.Max(b - decreaseRatio, 0));
+                            newImage.SetPixel(yPos, xPos, c);
+                            break;
+                        case 2: // Ambos - Amarelo
+                            c = Color.FromArgb(255, Math.Min(r + increaseRatio, 255), Math.Min(g + increaseRatio, 255), Math.Max(b - decreaseRatio, 0));
+                            newImage.SetPixel(yPos, xPos, c);
+                            break;
+                        case 3: // Não plantação - Vermelho
+                            c = Color.FromArgb(255, Math.Min(r + increaseRatio, 255), Math.Max(g - decreaseRatio, 0), Math.Max(b - decreaseRatio, 0));
+                            newImage.SetPixel(yPos, xPos, c);
+                            break;
+                        default: // Apenas valores do preset são suportados
+                            MessageBox.Show("Valor inválido na matriz de dados na posição [" + i0 + "," + j0 + "]");
                             break;
                     }
                 }
@@ -260,7 +331,6 @@ namespace Ground_Truth {
                     writeText.WriteLine(jsize);
                     for (int i = 0; i < isize; i++) {
                         for (int j = 0; j < jsize; j++) {
-                            Console.Write(mat[i, j]);
                             writeText.Write(mat[i, j]);
                         }
                         writeText.WriteLine();
