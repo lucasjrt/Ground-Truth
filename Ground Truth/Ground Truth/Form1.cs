@@ -6,12 +6,15 @@ using System.Windows.Forms;
 
 namespace Ground_Truth {
     public partial class Form1 : Form {
-        Bitmap mainImage; //Imagem principal, não é alterada
+        Bitmap mainImage; // Imagem principal, não é alterada
+        Bitmap zoomImage; // Imagem com zoom
         Pen pen; // "Caneta" usada para desenhar o grid
         int gridSize = 25; //25 = Default
+        int zoom = 1; // 1 = Default
         int w, h; // Width, Height - Dimensões da imagem redimensionada
         string file; // Diretório da imagem
         string read; // Linha lida do arquivo
+        Size zoomSize; // Tamanho da imagem redimensionada
         Graphics g;
         int increaseRatio = 100, decreaseRatio = 100; // increaseRatio / decreaseRatio - Taxa de alteração de cor
 
@@ -42,9 +45,7 @@ namespace Ground_Truth {
 
         //Tratador do evento de clique na imagem
         private void PictureBox1_MouseUp(object sender, MouseEventArgs e) {
-            
-            
-            int i = (int) (e.Y / gridSize), j = (int) (e.X / gridSize);
+            int i = (int) (e.Y / (gridSize * zoom)), j = (int) (e.X / (gridSize * zoom));
 
             if (e.Button == MouseButtons.Left) // Se o clique for com o botão esquerdo, troca a cor pra frente
                 if (mat[i, j] < 3)
@@ -62,24 +63,17 @@ namespace Ground_Truth {
                 first = new Point(j, i);
                 PaintImageSquare(i, j);
                 UpdateMatrix(mat[i, j], i, j);
-                Console.WriteLine("Posicao (" + first.Y + "," + first.X + ") selecionada");
             } else if (Control.ModifierKeys == Keys.Control & ctrl_pressed) {
-                Console.WriteLine("Colorindo ");
-                for(int y = first.Y; y <= first.Y + Math.Abs(first.Y - i); y++) {
-                    for(int x = first.X; x <= first.X + Math.Abs(first.X - j); x++) {
+                for(int y = Math.Min(first.Y, i); y <= Math.Min(first.Y, i) + Math.Abs(first.Y - i); y++) {
+                    for(int x = Math.Min(first.X, j); x <= Math.Min(first.X, j) + Math.Abs(first.X - j); x++) {
                         UpdateMatrix(mat[first.Y, first.X], y, x);
-                        Console.WriteLine("Alterando mat[" + x + "," + y + "] para " + mat[first.Y, first.X]);
                     }
                 }
-                Console.WriteLine("X = " + first.X + ", Y = " + first.Y + " = " + mat[first.Y, first.X]);
-                Console.WriteLine("J = " + j + ", I = " + i);
-                PaintImageRectangle(first.Y, first.X, i, j);
+                PaintImageRectangle(Math.Min(first.Y, i), Math.Min(first.X, j), Math.Max(i, first.Y), Math.Max(j, first.X));
                 ctrl_pressed = false;
-                Console.WriteLine("Colorindo retângulo de (" + first.Y + "," + first.X + ") até (" + j + "," + i + ")");
             } else {
                 ctrl_pressed = false;
                 PaintImageSquare(i, j);
-                Console.WriteLine("Cancelando o retângulo");
                 UpdateMatrix(mat[i, j], i, j);
             }
             GC.Collect();
@@ -90,17 +84,16 @@ namespace Ground_Truth {
             Bitmap newImage = new Bitmap(picBoxImage.Image);
             int r, g, b, xPos, yPos;
             Color c;
-
-            for(int y = 1; y < gridSize; y++) {
-                for (int x = 1; x < gridSize; x++) {
-                    xPos = i * gridSize + x;
-                    yPos = j * gridSize + y;
-                    r = mainImage.GetPixel(yPos, xPos).R;
-                    g = mainImage.GetPixel(yPos, xPos).G;
-                    b = mainImage.GetPixel(yPos, xPos).B;
+            for(int y = 1; y < gridSize * zoom; y++) {
+                for (int x = 1; x < gridSize * zoom; x++) {
+                    xPos = i * gridSize * zoom + x;
+                    yPos = j * gridSize * zoom + y;
+                    r = zoomImage.GetPixel(yPos, xPos).R;
+                    g = zoomImage.GetPixel(yPos, xPos).G;
+                    b = zoomImage.GetPixel(yPos, xPos).B;
                     switch (mat[i,j]) {
                         case 0: // Indefinido - Não muda a cor
-                            c = mainImage.GetPixel(yPos, xPos);
+                            c = zoomImage.GetPixel(yPos, xPos);
                             newImage.SetPixel(yPos, xPos, c);
                             break;
                         case 1: // Plantação - Verde
@@ -124,23 +117,24 @@ namespace Ground_Truth {
             picBoxImage.Image = newImage;
         }
 
+        // Color a imagem entre dois pontos
         private void PaintImageRectangle(int i0, int j0, int i1, int j1) {
             Bitmap newImage = new Bitmap(picBoxImage.Image);
             int r, g, b, xPos, yPos;
             Color c;
 
-            for (int y = 1; y < gridSize * (Math.Abs(j1 - j0) + 1); y++) {
-                for (int x = 1; x < gridSize * (Math.Abs(i1 - i0) + 1); x++) {
-                    if (x % 25 == 0 || y % 25 == 0)
+            for (int y = 1; y < gridSize * zoom * (Math.Abs(j1 - j0) + 1); y++) {
+                for (int x = 1; x < gridSize * zoom * (Math.Abs(i1 - i0) + 1); x++) {
+                    if (x % (gridSize * zoom) == 0 || y % (gridSize * zoom) == 0)
                         continue;
-                    xPos = i0 * gridSize + x;
-                    yPos = j0 * gridSize + y;
-                    r = mainImage.GetPixel(yPos, xPos).R;
-                    g = mainImage.GetPixel(yPos, xPos).G;
-                    b = mainImage.GetPixel(yPos, xPos).B;
+                    xPos = i0 * gridSize * zoom + x;
+                    yPos = j0 * gridSize * zoom + y;
+                    r = zoomImage.GetPixel(yPos, xPos).R;
+                    g = zoomImage.GetPixel(yPos, xPos).G;
+                    b = zoomImage.GetPixel(yPos, xPos).B;
                     switch (mat[i0, j0]) {
                         case 0: // Indefinido - Não muda a cor
-                            c = mainImage.GetPixel(yPos, xPos);
+                            c = zoomImage.GetPixel(yPos, xPos);
                             newImage.SetPixel(yPos, xPos, c);
                             break;
                         case 1: // Plantação - Verde
@@ -172,16 +166,16 @@ namespace Ground_Truth {
             for (int i = 0; i < isize; i++) { // Percorrendo a matriz
                 for(int j = 0; j < jsize; j++) { 
                     if(mat[i,j] != 0) { // Só colore o quadrado se necessário
-                        for(int y = 0; y < gridSize; y++) { // Percorrendo os pixels da imagem
-                            for (int x = 0; x < gridSize; x++) {
-                                xPos = i * gridSize + x;
-                                yPos = j * gridSize + y;
-                                r = mainImage.GetPixel(yPos, xPos).R;
-                                g = mainImage.GetPixel(yPos, xPos).G;
-                                b = mainImage.GetPixel(yPos, xPos).B;
+                        for(int y = 0; y < gridSize * zoom; y++) { // Percorrendo os pixels da imagem
+                            for (int x = 0; x < gridSize * zoom; x++) {
+                                xPos = i * gridSize * zoom + x;
+                                yPos = j * gridSize * zoom + y;
+                                r = zoomImage.GetPixel(yPos, xPos).R;
+                                g = zoomImage.GetPixel(yPos, xPos).G;
+                                b = zoomImage.GetPixel(yPos, xPos).B;
                                 switch (mat[i,j]) {
                                     case 0: // Indefinido - Não muda a cor
-                                        c = mainImage.GetPixel(yPos, xPos);
+                                        c = zoomImage.GetPixel(yPos, xPos);
                                         newImage.SetPixel(yPos, xPos, c);
                                         break;
                                     case 1: // Plantação - Verde
@@ -213,6 +207,8 @@ namespace Ground_Truth {
         private void OpenFileDialog1_FileOk(object sender, CancelEventArgs e) {
             file = openFileDialog1.FileName; // atribuindo a localização da imagem
             mainImage = new Bitmap(Image.FromFile(file));
+            zoomImage = mainImage;
+            zoomSize = mainImage.Size;
             w = mainImage.Width;
             h = mainImage.Height;
             try {
@@ -237,6 +233,7 @@ namespace Ground_Truth {
                 picBoxImage.Image = new Bitmap(CropImage(mainImage, new Rectangle(0, 0, w, h)));
 
             cbGridSize.Enabled = true;
+            cbZoom.Enabled = true;
             if(StartMatrix())
                 LoadColors(); // Colore a imagem conforme a matriz de dados
             DrawGrid();
@@ -255,6 +252,8 @@ namespace Ground_Truth {
                 if (mainImage != null) // Se a imagem principal já tem uma instância
                     mainImage.Dispose(); // Descarta essa instância, por motivos de memória
                 mainImage = new Bitmap(Image.FromFile(txtDirectory.Text));
+                zoomImage = mainImage;
+                zoomSize = mainImage.Size;
                 file = txtDirectory.Text; // atribuindo a localização da imagem
                 w = mainImage.Width;
                 h = mainImage.Height;
@@ -269,6 +268,7 @@ namespace Ground_Truth {
                     picBoxImage.Image = new Bitmap(CropImage(mainImage, new Rectangle(0, 0, w, h))); 
                 GC.Collect(); //Garbage collector
                 cbGridSize.Enabled = true;
+                cbZoom.Enabled = true;
                 if (StartMatrix())
                     LoadColors();
                 DrawGrid();
@@ -285,7 +285,7 @@ namespace Ground_Truth {
                 return;
             pen = new Pen(Color.White); // Atribui a cor do grid
             g = Graphics.FromImage(picBoxImage.Image); // Onde vai ser desenhado o grid
-            for (int i = 0; i < picBoxImage.Height || i < picBoxImage.Width; i += gridSize) { // Loop para desenhar o grid
+            for (int i = 0; i < picBoxImage.Height || i < picBoxImage.Width; i += gridSize * zoom) { // Loop para desenhar o grid
                 g.DrawLine(pen, i, 0, i, picBoxImage.Height); // Linhas verticais
                 g.DrawLine(pen, 0, i, picBoxImage.Width, i); // Linhas horizontais
             }
@@ -315,6 +315,24 @@ namespace Ground_Truth {
 
             if (StartMatrix())
                 LoadColors();
+            DrawGrid();
+        }
+
+        private void ComboBox1_SelectedIndexChanged(object sender, EventArgs e) {
+            zoom = Convert.ToInt32(Convert.ToString(cbZoom.Text[0]));
+            ReloadImage();
+        }
+
+        private void ReloadImage() {
+            zoomImage = mainImage;
+            zoomSize = new Size((int)(w * zoom), (int)(h * zoom));
+            Bitmap bmp = new Bitmap(mainImage, zoomSize);
+            picBoxImage.Size = zoomSize;
+            picBoxImage.SizeMode = PictureBoxSizeMode.Normal;
+            zoomImage = bmp;
+            picBoxImage.Image = zoomImage; 
+            GC.Collect();
+            LoadColors();
             DrawGrid();
         }
 
@@ -403,6 +421,13 @@ namespace Ground_Truth {
                 }
             }
             return exists;
+        }
+
+        private void Swap(int i, int j) {
+            int aux;
+            aux = i;
+            i = j;
+            j = aux;
         }
     }    
 }
