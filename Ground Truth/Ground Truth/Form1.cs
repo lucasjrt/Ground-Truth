@@ -207,10 +207,10 @@ namespace Ground_Truth {
         private void OpenFileDialog1_FileOk(object sender, CancelEventArgs e) {
             file = openFileDialog1.FileName; // atribuindo a localização da imagem
             mainImage = new Bitmap(Image.FromFile(file));
-            zoomImage = mainImage;
             zoomSize = mainImage.Size;
             w = mainImage.Width;
             h = mainImage.Height;
+
             try {
                 gridSize = Convert.ToInt32(cbGridSize.Text); //atribui à variável global o tamanho do grid
             } catch (System.FormatException) {
@@ -226,11 +226,15 @@ namespace Ground_Truth {
              * não é necessário redimensionar a imagem
              */
             picBoxImage.Enabled = true; // Habilita o clique na imagem
+
+            Size s = new Size(w * zoom, h * zoom);
+            zoomImage = new Bitmap(mainImage, s);
+
             // Verifica a necessidade de redimensionar a imagem
             if (w == mainImage.Width && h == mainImage.Height)
-                picBoxImage.Image = new Bitmap (mainImage);
+                picBoxImage.Image = new Bitmap (mainImage, s);
             else
-                picBoxImage.Image = new Bitmap(CropImage(mainImage, new Rectangle(0, 0, w, h)));
+                picBoxImage.Image = new Bitmap(CropImage(mainImage, new Rectangle(0, 0, w, h)), s);
 
             cbGridSize.Enabled = true;
             cbZoom.Enabled = true;
@@ -252,7 +256,6 @@ namespace Ground_Truth {
                 if (mainImage != null) // Se a imagem principal já tem uma instância
                     mainImage.Dispose(); // Descarta essa instância, por motivos de memória
                 mainImage = new Bitmap(Image.FromFile(txtDirectory.Text));
-                zoomImage = mainImage;
                 zoomSize = mainImage.Size;
                 file = txtDirectory.Text; // atribuindo a localização da imagem
                 w = mainImage.Width;
@@ -262,10 +265,12 @@ namespace Ground_Truth {
                     h = mainImage.Height - (mainImage.Height % gridSize); //calcula nova altura da imagem
                 }
                 picBoxImage.Enabled = true;
+                Size s = new Size(w * zoom, h * zoom);
+                zoomImage = new Bitmap(mainImage, s);
                 if (w == mainImage.Width && h == mainImage.Height) // Verifica se é necessário redimensionar a imagem
-                    picBoxImage.Image = new Bitmap(mainImage);
+                    picBoxImage.Image = new Bitmap(mainImage, s);
                 else
-                    picBoxImage.Image = new Bitmap(CropImage(mainImage, new Rectangle(0, 0, w, h))); 
+                    picBoxImage.Image = new Bitmap(CropImage(mainImage, new Rectangle(0, 0, w, h)), s); 
                 GC.Collect(); //Garbage collector
                 cbGridSize.Enabled = true;
                 cbZoom.Enabled = true;
@@ -308,10 +313,12 @@ namespace Ground_Truth {
             w = mainImage.Width - (mainImage.Width % gridSize); // calcula nova largura da imagem
             h = mainImage.Height - (mainImage.Height % gridSize); //calcula nova altura da imagem
 
+            Size s = new Size(w * zoom, h * zoom);
+
             if (w == mainImage.Width && h == mainImage.Height) // Verifica se é necessário redimensionar a imagem
-                picBoxImage.Image = new Bitmap(mainImage);
+                picBoxImage.Image = new Bitmap(mainImage, s);
             else
-                picBoxImage.Image = new Bitmap(CropImage(mainImage, new Rectangle(0, 0, w, h)));
+                picBoxImage.Image = new Bitmap(CropImage(mainImage, new Rectangle(0, 0, w, h)), s);
 
             if (StartMatrix())
                 LoadColors();
