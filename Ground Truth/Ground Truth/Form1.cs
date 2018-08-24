@@ -340,7 +340,8 @@ namespace Ground_Truth {
             picBoxImage.Size = zoomSize;
             picBoxImage.SizeMode = PictureBoxSizeMode.Normal;
             zoomImage = bmp;
-            picBoxImage.Image = zoomImage; 
+            picBoxImage.Image = zoomImage;
+            picBoxImage.Size = zoomSize;
             GC.Collect();
             LoadColors();
             DrawGrid();
