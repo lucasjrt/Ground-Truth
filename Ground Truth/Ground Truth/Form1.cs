@@ -64,12 +64,13 @@ namespace Ground_Truth {
                 first = new Point(j, i);
                 PaintImageSquare(i, j);
                 UpdateMatrix(mat[i, j], i, j);
-            } else if (Control.ModifierKeys == Keys.Control & ctrl_pressed) {
+            } else if (Control.ModifierKeys == Keys.Control && ctrl_pressed) {
                 for(int y = Math.Min(first.Y, i); y <= Math.Min(first.Y, i) + Math.Abs(first.Y - i); y++) {
                     for(int x = Math.Min(first.X, j); x <= Math.Min(first.X, j) + Math.Abs(first.X - j); x++) {
-                        UpdateMatrix(mat[first.Y, first.X], y, x);
+                        mat[y, x] = mat[first.Y, first.X];
                     }
                 }
+                SaveMatrix();
                 PaintImageRectangle(Math.Min(first.Y, i), Math.Min(first.X, j), Math.Max(i, first.Y), Math.Max(j, first.X));
                 ctrl_pressed = false;
             } else {
@@ -353,12 +354,35 @@ namespace Ground_Truth {
             }
 
             picBoxImage.Image.Save(imagefile);
+
+            MessageBox.Show("Imagem salva com sucesso em \"" + imagefile + "\"");
+        }
+
+        private void SaveMatrix() {
+            if(mat == null || datfile == null) {
+                StartMatrix();
+                MessageBox.Show("A matriz era nula, criando uma nova matriz");
+            }
+
+            using (StreamWriter writeText = new StreamWriter(datfile)) {
+                writeText.WriteLine(isize);
+                writeText.WriteLine(jsize);
+                for (int i = 0; i < isize; i++) {
+                    for (int j = 0; j < jsize; j++) {
+                        writeText.Write(mat[i, j]);
+                    }
+                    writeText.WriteLine();
+                }
+            }
+             
         }
 
         // Atualiza a matriz no disco
-        private void UpdateMatrix(int value, int x, int y) {
-            if (mat == null)
+        private bool UpdateMatrix(int value, int x, int y) {
+            if (mat == null || datfile == null) {
                 StartMatrix();
+                MessageBox.Show("A matriz era nula, criando uma nova matriz");
+            }
 
             mat[x, y] = value;
             if (File.Exists(datfile)) {
@@ -375,7 +399,9 @@ namespace Ground_Truth {
                 }
             } else {
                 MessageBox.Show("Não foi encontrado o arquivo de dados para ser atualizado, feche e abra novamente o Ground Truth");
+                return false; // Retorna falso se ocorrer um erro
             }
+            return true; // Retorna true se finalizar a execução com sucesso
         }
 
         /*

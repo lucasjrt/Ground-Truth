@@ -112,7 +112,7 @@ namespace Ground_Truth {
             this.cbGridSize.Location = new System.Drawing.Point(720, 518);
             this.cbGridSize.Name = "cbGridSize";
             this.cbGridSize.Size = new System.Drawing.Size(50, 24);
-            this.cbGridSize.TabIndex = 4;
+            this.cbGridSize.TabIndex = 5;
             this.cbGridSize.Text = "25";
             this.cbGridSize.SelectedIndexChanged += new System.EventHandler(this.CbGridSize_SelectedIndexChanged);
             // 
@@ -147,7 +147,7 @@ namespace Ground_Truth {
             this.cbZoom.Location = new System.Drawing.Point(532, 519);
             this.cbZoom.Name = "cbZoom";
             this.cbZoom.Size = new System.Drawing.Size(49, 24);
-            this.cbZoom.TabIndex = 3;
+            this.cbZoom.TabIndex = 4;
             this.cbZoom.Text = "1x";
             this.cbZoom.SelectedIndexChanged += new System.EventHandler(this.ComboBox1_SelectedIndexChanged);
             // 
@@ -158,7 +158,7 @@ namespace Ground_Truth {
             this.btnSalvar.Location = new System.Drawing.Point(417, 519);
             this.btnSalvar.Name = "btnSalvar";
             this.btnSalvar.Size = new System.Drawing.Size(61, 23);
-            this.btnSalvar.TabIndex = 11;
+            this.btnSalvar.TabIndex = 3;
             this.btnSalvar.Text = "Salvar";
             this.btnSalvar.UseVisualStyleBackColor = true;
             this.btnSalvar.Click += new System.EventHandler(this.btnSalvar_Click);
