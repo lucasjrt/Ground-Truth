@@ -153,6 +153,7 @@ namespace Ground_Truth {
             // 
             // btnSalvar
             // 
+            this.btnSalvar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
             this.btnSalvar.Enabled = false;
             this.btnSalvar.Location = new System.Drawing.Point(417, 519);
             this.btnSalvar.Name = "btnSalvar";
