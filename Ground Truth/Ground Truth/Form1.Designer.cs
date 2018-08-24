@@ -36,6 +36,7 @@ namespace Ground_Truth {
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.cbZoom = new System.Windows.Forms.ComboBox();
+            this.btnSalvar = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.picBoxImage)).BeginInit();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
@@ -46,14 +47,14 @@ namespace Ground_Truth {
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtDirectory.Location = new System.Drawing.Point(12, 519);
             this.txtDirectory.Name = "txtDirectory";
-            this.txtDirectory.Size = new System.Drawing.Size(340, 22);
+            this.txtDirectory.Size = new System.Drawing.Size(286, 22);
             this.txtDirectory.TabIndex = 0;
             this.txtDirectory.Text = "C:\\";
             // 
             // btnSearch
             // 
             this.btnSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSearch.Location = new System.Drawing.Point(359, 519);
+            this.btnSearch.Location = new System.Drawing.Point(304, 519);
             this.btnSearch.Name = "btnSearch";
             this.btnSearch.Size = new System.Drawing.Size(42, 23);
             this.btnSearch.TabIndex = 1;
@@ -64,7 +65,7 @@ namespace Ground_Truth {
             // btnOpen
             // 
             this.btnOpen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnOpen.Location = new System.Drawing.Point(407, 519);
+            this.btnOpen.Location = new System.Drawing.Point(352, 519);
             this.btnOpen.Name = "btnOpen";
             this.btnOpen.Size = new System.Drawing.Size(59, 23);
             this.btnOpen.TabIndex = 2;
@@ -150,11 +151,23 @@ namespace Ground_Truth {
             this.cbZoom.Text = "1x";
             this.cbZoom.SelectedIndexChanged += new System.EventHandler(this.ComboBox1_SelectedIndexChanged);
             // 
+            // btnSalvar
+            // 
+            this.btnSalvar.Enabled = false;
+            this.btnSalvar.Location = new System.Drawing.Point(417, 519);
+            this.btnSalvar.Name = "btnSalvar";
+            this.btnSalvar.Size = new System.Drawing.Size(61, 23);
+            this.btnSalvar.TabIndex = 11;
+            this.btnSalvar.Text = "Salvar";
+            this.btnSalvar.UseVisualStyleBackColor = true;
+            this.btnSalvar.Click += new System.EventHandler(this.btnSalvar_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(782, 553);
+            this.Controls.Add(this.btnSalvar);
             this.Controls.Add(this.cbZoom);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -186,6 +199,7 @@ namespace Ground_Truth {
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox cbZoom;
+        private System.Windows.Forms.Button btnSalvar;
     }
 }
 

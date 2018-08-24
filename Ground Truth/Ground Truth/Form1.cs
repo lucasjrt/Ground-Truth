@@ -38,6 +38,7 @@ namespace Ground_Truth {
          * Linha n valores...
          */
         string datfile; // Caminho do arquivo de dados
+        string imagefile; // Caminho da imagem modificada
 
         public Form1() {
             InitializeComponent();
@@ -238,6 +239,7 @@ namespace Ground_Truth {
 
             cbGridSize.Enabled = true;
             cbZoom.Enabled = true;
+            btnSalvar.Enabled = true;
             if(StartMatrix())
                 LoadColors(); // Colore a imagem conforme a matriz de dados
             DrawGrid();
@@ -274,6 +276,7 @@ namespace Ground_Truth {
                 GC.Collect(); //Garbage collector
                 cbGridSize.Enabled = true;
                 cbZoom.Enabled = true;
+                btnSalvar.Enabled = true;
                 if (StartMatrix())
                     LoadColors();
                 DrawGrid();
@@ -341,6 +344,21 @@ namespace Ground_Truth {
             GC.Collect();
             LoadColors();
             DrawGrid();
+        }
+
+        private void btnSalvar_Click(object sender, EventArgs e) {
+            if(picBoxImage.Image == null) {
+                MessageBox.Show("Imagem inválida");
+                return;
+            }
+
+            imagefile = file.Substring(0, file.Length - 4) + "_" + gridSize.ToString() + ".jpg";
+
+            if(File.Exists(imagefile)) {
+                File.Delete(imagefile);
+            }
+
+            picBoxImage.Image.Save(imagefile);
         }
 
         // Atualiza a matriz no disco
