@@ -331,7 +331,6 @@ namespace Ground_Truth {
             zoomImage = mainImage;
             zoomSize = new Size((int)(w * zoom), (int)(h * zoom));
             Bitmap bmp = new Bitmap(mainImage, zoomSize);
-            picBoxImage.Size = zoomSize;
             picBoxImage.SizeMode = PictureBoxSizeMode.Normal;
             zoomImage = bmp;
             picBoxImage.Image = zoomImage;
