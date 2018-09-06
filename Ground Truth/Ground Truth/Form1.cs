@@ -9,14 +9,14 @@ namespace Ground_Truth {
         Bitmap mainImage; // Imagem principal, não é alterada
         Bitmap zoomImage; // Imagem com zoom
         Pen pen; // "Caneta" usada para desenhar o grid
-        int gridSize = 25; //25 = Default
+        int gridSize = 32; //32 = Default
         int zoom = 1; // 1 = Default
         int w, h; // Width, Height - Dimensões da imagem redimensionada
         string file; // Diretório da imagem
         string read; // Linha lida do arquivo
         Size zoomSize; // Tamanho da imagem redimensionada
         Graphics g;
-        int increaseRatio = 100, decreaseRatio = 100; // increaseRatio / decreaseRatio - Taxa de alteração de cor
+        int increaseRatio = 80, decreaseRatio = 80; // increaseRatio / decreaseRatio - Taxa de alteração de cor
 
         bool ctrl_pressed = false;
         Point first;
@@ -162,7 +162,7 @@ namespace Ground_Truth {
 
         // Colore a imagem se existir o arquivo de dados
         private void LoadColors() {
-            int r, g, b, xPos, yPos, increaseRatio = 100, decreaseRatio = 100;
+            int r, g, b, xPos, yPos;
             Color c;
             Bitmap newImage = new Bitmap(picBoxImage.Image);
             for (int i = 0; i < isize; i++) { // Percorrendo a matriz
@@ -420,18 +420,8 @@ namespace Ground_Truth {
                 GC.Collect();
             }
                 
-            // Verificação do nome que o arquivo terá
-            switch (gridSize) {
-                case 25:
-                    datfile = file.Substring(0, file.Length - 4) + "_25.dat";
-                    break;
-                case 50:
-                    datfile = file.Substring(0, file.Length - 4) + "_50.dat";
-                    break;
-                case 80:
-                    datfile = file.Substring(0, file.Length - 4) + "_80.dat";
-                    break;
-            }
+            // Nome que o arquivo terá
+            datfile = file.Substring(0, file.Length - 4) + "_" + gridSize.ToString() + ".dat";
 
             // Dimensões da matriz
             isize = picBoxImage.Image.Height / gridSize; 

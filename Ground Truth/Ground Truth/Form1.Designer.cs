@@ -106,14 +106,15 @@ namespace Ground_Truth {
             this.cbGridSize.Enabled = false;
             this.cbGridSize.FormattingEnabled = true;
             this.cbGridSize.Items.AddRange(new object[] {
+            "16",
             "25",
-            "50",
-            "80"});
+            "32",
+            "50"});
             this.cbGridSize.Location = new System.Drawing.Point(720, 518);
             this.cbGridSize.Name = "cbGridSize";
             this.cbGridSize.Size = new System.Drawing.Size(50, 24);
             this.cbGridSize.TabIndex = 5;
-            this.cbGridSize.Text = "25";
+            this.cbGridSize.Text = "32";
             this.cbGridSize.SelectedIndexChanged += new System.EventHandler(this.CbGridSize_SelectedIndexChanged);
             // 
             // label1
