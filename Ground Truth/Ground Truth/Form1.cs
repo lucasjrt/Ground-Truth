@@ -46,39 +46,44 @@ namespace Ground_Truth {
 
         //Tratador do evento de clique na imagem
         private void PictureBox1_MouseUp(object sender, MouseEventArgs e) {
-            int i = (int) (e.Y / (gridSize * zoom)), j = (int) (e.X / (gridSize * zoom));
+            try {
+                int i = (int)(e.Y / (gridSize * zoom)), j = (int)(e.X / (gridSize * zoom));
 
-            if (e.Button == MouseButtons.Left) // Se o clique for com o botão esquerdo, troca a cor pra frente
-                if (mat[i, j] < 3)
-                    mat[i, j]++;
-                else
-                    mat[i, j] = 0;
-             else if (e.Button == MouseButtons.Right) // Se o clique for com o botão direito, troca a cor pra trás
-                if (mat[i, j] > 0)
-                    mat[i, j]--;
-                else
-                    mat[i, j] = 3;
+                if (e.Button == MouseButtons.Left) // Se o clique for com o botão esquerdo, troca a cor pra frente
+                    if (mat[i, j] < 3)
+                        mat[i, j]++;
+                    else
+                        mat[i, j] = 0;
+                else if (e.Button == MouseButtons.Right) // Se o clique for com o botão direito, troca a cor pra trás
+                    if (mat[i, j] > 0)
+                        mat[i, j]--;
+                    else
+                        mat[i, j] = 3;
 
-            if (Control.ModifierKeys == Keys.Control && !ctrl_pressed) {
-                ctrl_pressed = true;
-                first = new Point(j, i);
-                PaintImageSquare(i, j);
-                UpdateMatrix(mat[i, j], i, j);
-            } else if (Control.ModifierKeys == Keys.Control && ctrl_pressed) {
-                for(int y = Math.Min(first.Y, i); y <= Math.Min(first.Y, i) + Math.Abs(first.Y - i); y++) {
-                    for(int x = Math.Min(first.X, j); x <= Math.Min(first.X, j) + Math.Abs(first.X - j); x++) {
-                        mat[y, x] = mat[first.Y, first.X];
+                if (Control.ModifierKeys == Keys.Control && !ctrl_pressed) {
+                    ctrl_pressed = true;
+                    first = new Point(j, i);
+                    PaintImageSquare(i, j);
+                    UpdateMatrix(mat[i, j], i, j);
+                } else if (Control.ModifierKeys == Keys.Control && ctrl_pressed) {
+                    for (int y = Math.Min(first.Y, i); y <= Math.Min(first.Y, i) + Math.Abs(first.Y - i); y++) {
+                        for (int x = Math.Min(first.X, j); x <= Math.Min(first.X, j) + Math.Abs(first.X - j); x++) {
+                            mat[y, x] = mat[first.Y, first.X];
+                        }
                     }
+                    SaveMatrix();
+                    PaintImageRectangle(Math.Min(first.Y, i), Math.Min(first.X, j), Math.Max(i, first.Y), Math.Max(j, first.X));
+                    ctrl_pressed = false;
+                } else {
+                    ctrl_pressed = false;
+                    PaintImageSquare(i, j);
+                    UpdateMatrix(mat[i, j], i, j);
                 }
-                SaveMatrix();
-                PaintImageRectangle(Math.Min(first.Y, i), Math.Min(first.X, j), Math.Max(i, first.Y), Math.Max(j, first.X));
-                ctrl_pressed = false;
-            } else {
-                ctrl_pressed = false;
-                PaintImageSquare(i, j);
-                UpdateMatrix(mat[i, j], i, j);
+                GC.Collect();
             }
-            GC.Collect();
+            // Ignora exceções de clique fora da matriz e clique no picbox sem imagem carregada
+            catch (IndexOutOfRangeException) {}
+            catch (NullReferenceException) {}
         }
 
         // Colore um quadrado da posição (i, j) até a posição (i + gridSize, j + gridSize)
