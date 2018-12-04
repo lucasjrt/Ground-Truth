@@ -83,7 +83,6 @@ namespace Ground_Truth {
 
         // Colore um quadrado da posição (i, j) até a posição (i + gridSize, j + gridSize)
         private void PaintImageSquare(int i, int j) {
-            Bitmap newImage = new Bitmap(picBoxImage.Image);
             int r, g, b, xPos, yPos;
             Color c;
             for(int y = 1; y < gridSize * zoom; y++) {
@@ -96,19 +95,19 @@ namespace Ground_Truth {
                     switch (mat[i,j]) {
                         case 0: // Indefinido - Não muda a cor
                             c = zoomImage.GetPixel(yPos, xPos);
-                            newImage.SetPixel(yPos, xPos, c);
+                            ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
                             break;
                         case 1: // Plantação - Verde
                             c = Color.FromArgb(255, Math.Max(r - decreaseRatio , 0) , Math.Min(g + increaseRatio, 255), Math.Max(b - decreaseRatio, 0));
-                            newImage.SetPixel(yPos, xPos, c);
+                            ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
                             break;
                         case 2: // Ambos - Amarelo
                             c = Color.FromArgb(255, Math.Min(r + increaseRatio, 255), Math.Min(g + increaseRatio, 255), Math.Max(b - decreaseRatio, 0));
-                            newImage.SetPixel(yPos, xPos, c);
+                            ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
                             break;
                         case 3: // Não plantação - Vermelho
                             c = Color.FromArgb(255, Math.Min(r + increaseRatio, 255), Math.Max(g - decreaseRatio, 0), Math.Max(b - decreaseRatio, 0));
-                            newImage.SetPixel(yPos, xPos, c);
+                            ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
                             break;
                         default: // Apenas valores do preset são suportados
                             MessageBox.Show("Valor inválido na matriz de dados na posição [" + i + "," + j + "]");
@@ -116,19 +115,20 @@ namespace Ground_Truth {
                     }
                 }
             }
-            picBoxImage.Image = newImage;
+            picBoxImage.Refresh();
         }
 
         // Color a imagem entre dois pontos
         private void PaintImageRectangle(int i0, int j0, int i1, int j1) {
-            Bitmap newImage = new Bitmap(picBoxImage.Image);
             int r, g, b, xPos, yPos;
             Color c;
 
             for (int y = 1; y < gridSize * zoom * (Math.Abs(j1 - j0) + 1); y++) {
                 for (int x = 1; x < gridSize * zoom * (Math.Abs(i1 - i0) + 1); x++) {
+                    // Não muda a cor de pixels que estão com o grid desenhado
                     if (x % (gridSize * zoom) == 0 || y % (gridSize * zoom) == 0)
                         continue;
+
                     xPos = i0 * gridSize * zoom + x;
                     yPos = j0 * gridSize * zoom + y;
                     r = zoomImage.GetPixel(yPos, xPos).R;
@@ -137,19 +137,19 @@ namespace Ground_Truth {
                     switch (mat[i0, j0]) {
                         case 0: // Indefinido - Não muda a cor
                             c = zoomImage.GetPixel(yPos, xPos);
-                            newImage.SetPixel(yPos, xPos, c);
+                            ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
                             break;
                         case 1: // Plantação - Verde
                             c = Color.FromArgb(255, Math.Max(r - decreaseRatio, 0), Math.Min(g + increaseRatio, 255), Math.Max(b - decreaseRatio, 0));
-                            newImage.SetPixel(yPos, xPos, c);
+                            ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
                             break;
                         case 2: // Ambos - Amarelo
                             c = Color.FromArgb(255, Math.Min(r + increaseRatio, 255), Math.Min(g + increaseRatio, 255), Math.Max(b - decreaseRatio, 0));
-                            newImage.SetPixel(yPos, xPos, c);
+                            ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
                             break;
                         case 3: // Não plantação - Vermelho
                             c = Color.FromArgb(255, Math.Min(r + increaseRatio, 255), Math.Max(g - decreaseRatio, 0), Math.Max(b - decreaseRatio, 0));
-                            newImage.SetPixel(yPos, xPos, c);
+                            ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
                             break;
                         default: // Apenas valores do preset são suportados
                             MessageBox.Show("Valor inválido na matriz de dados na posição [" + i0 + "," + j0 + "]");
@@ -157,14 +157,13 @@ namespace Ground_Truth {
                     }
                 }
             }
-            picBoxImage.Image = newImage;
+            picBoxImage.Refresh();
         }
 
         // Colore a imagem se existir o arquivo de dados
         private void LoadColors() {
             int r, g, b, xPos, yPos;
             Color c;
-            Bitmap newImage = new Bitmap(picBoxImage.Image);
             for (int i = 0; i < isize; i++) { // Percorrendo a matriz
                 for(int j = 0; j < jsize; j++) { 
                     if(mat[i,j] != 0) { // Só colore o quadrado se necessário
@@ -176,21 +175,17 @@ namespace Ground_Truth {
                                 g = zoomImage.GetPixel(yPos, xPos).G;
                                 b = zoomImage.GetPixel(yPos, xPos).B;
                                 switch (mat[i,j]) {
-                                    case 0: // Indefinido - Não muda a cor
-                                        c = zoomImage.GetPixel(yPos, xPos);
-                                        newImage.SetPixel(yPos, xPos, c);
-                                        break;
                                     case 1: // Plantação - Verde
                                         c = Color.FromArgb(255, Math.Max(r - decreaseRatio, 0), Math.Min(g + increaseRatio, 255), Math.Max(b - decreaseRatio, 0));
-                                        newImage.SetPixel(yPos, xPos, c);
+                                        ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
                                         break;
                                     case 2: // Ambos - Amarelo
                                         c = Color.FromArgb(255, Math.Min(r + increaseRatio, 255), Math.Min(g + increaseRatio, 255), Math.Max(b - decreaseRatio, 0));
-                                        newImage.SetPixel(yPos, xPos, c);
+                                        ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
                                         break;
                                     case 3: // Não plantação - Vermelho
                                         c = Color.FromArgb(255, Math.Min(r + increaseRatio, 255), Math.Max(g - decreaseRatio, 0), Math.Max(b - decreaseRatio, 0));
-                                        newImage.SetPixel(yPos, xPos, c);
+                                        ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
                                         break;
                                     default:
                                         MessageBox.Show("Valor inválido na matriz de dados na posição [" + i + "," + j + "]");
@@ -201,7 +196,7 @@ namespace Ground_Truth {
                     }
                 }
             }
-            picBoxImage.Image = newImage;
+            picBoxImage.Refresh();
             GC.Collect();
         }
 
@@ -292,6 +287,7 @@ namespace Ground_Truth {
             for (int i = 0; i < picBoxImage.Height || i < picBoxImage.Width; i += gridSize * zoom) { // Loop para desenhar o grid
                 g.DrawLine(pen, i, 0, i, picBoxImage.Height); // Linhas verticais
                 g.DrawLine(pen, 0, i, picBoxImage.Width, i); // Linhas horizontais
+                picBoxImage.Refresh();
             }
             //Destrói os objetos
             pen.Dispose();
@@ -340,7 +336,7 @@ namespace Ground_Truth {
             DrawGrid();
         }
 
-        private void btnSalvar_Click(object sender, EventArgs e) {
+        private void BtnSalvar_Click(object sender, EventArgs e) {
             if(picBoxImage.Image == null) {
                 MessageBox.Show("Imagem inválida");
                 return;
