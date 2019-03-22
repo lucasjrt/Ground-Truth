@@ -86,7 +86,8 @@ namespace Ground_Truth {
             this.picBoxImage.SizeMode = System.Windows.Forms.PictureBoxSizeMode.AutoSize;
             this.picBoxImage.TabIndex = 6;
             this.picBoxImage.TabStop = false;
-            this.picBoxImage.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PictureBox1_MouseUp);
+            this.picBoxImage.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PictureBox1_MouseDown);
+            this.picBoxImage.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PictureBox1_MouseMove);
             // 
             // panel1
             // 

@@ -18,8 +18,11 @@ namespace Ground_Truth {
         Graphics g;
         int increaseRatio = 80, decreaseRatio = 80; // increaseRatio / decreaseRatio - Taxa de alteração de cor
 
-        bool ctrl_pressed = false;
-        Point first;
+        bool ctrl_pressed = false; // Usado para colorir um retângulo grande
+        int color_dragging = 0; // Decide a cor que vai ser colorida quando clicar e arrastar
+        Point first; // Guarda o primeiro ponto de onde vai ser colorido o retângulo
+        Point oldMouseLocation; // Usado para verificar se houve movimentação do mouse
+        Point oldSquare = new Point(); // Usado para verificar se o mouse trocou de quadrado
 
         /*
          * Matriz de informação:
@@ -44,21 +47,18 @@ namespace Ground_Truth {
             InitializeComponent();
         }
 
-        //Tratador do evento de clique na imagem
-        private void PictureBox1_MouseUp(object sender, MouseEventArgs e) {
+        // Tratador do evento de segurar o botão na imagem
+        private void PictureBox1_MouseDown(object sender, MouseEventArgs e) {
+            oldMouseLocation = e.Location;
             try {
                 int i = (int)(e.Y / (gridSize * zoom)), j = (int)(e.X / (gridSize * zoom));
-
+                oldSquare.X = j;
+                oldSquare.Y = i;
                 if (e.Button == MouseButtons.Left) // Se o clique for com o botão esquerdo, troca a cor pra frente
-                    if (mat[i, j] < 3)
-                        mat[i, j]++;
-                    else
-                        mat[i, j] = 0;
+                    mat[i, j] = (mat[i, j] + 1) % 4;
                 else if (e.Button == MouseButtons.Right) // Se o clique for com o botão direito, troca a cor pra trás
-                    if (mat[i, j] > 0)
-                        mat[i, j]--;
-                    else
-                        mat[i, j] = 3;
+                    mat[i, j] = (3 + mat[i,j]) % 4;
+                color_dragging = Math.Abs(mat[i, j]);
 
                 if (Control.ModifierKeys == Keys.Control && !ctrl_pressed) {
                     ctrl_pressed = true;
@@ -81,41 +81,66 @@ namespace Ground_Truth {
                 }
                 GC.Collect();
             }
-            // Ignora exceções de clique fora da matriz e clique no picbox sem imagem carregada
-            catch (IndexOutOfRangeException) {}
+            catch (IndexOutOfRangeException) {} 
             catch (NullReferenceException) {}
         }
 
-        // Colore um quadrado da posição (i, j) até a posição (i + gridSize, j + gridSize)
+        // Tratador do evento de clicar e arrastar na imagem
+        private void PictureBox1_MouseMove(object sender, MouseEventArgs e) {
+            Point newPos = e.Location;
+            try {
+                int i = (int)(e.Y / (gridSize * zoom)), j = (int)(e.X / (gridSize * zoom));
+                if ((e.Button == MouseButtons.Left || e.Button == MouseButtons.Right)
+                    && (newPos.X != oldMouseLocation.X || newPos.Y != oldMouseLocation.Y)
+                    && (oldSquare.X != j || oldSquare.Y != i)
+                    && !ctrl_pressed) {
+
+                    mat[i, j] = color_dragging;
+
+                    PaintImageSquare(i, j);
+                    UpdateMatrix(mat[i,j], i, j);
+
+                    oldSquare.X = j;
+                    oldSquare.Y = i;
+                    oldMouseLocation = newPos;
+
+                }
+                GC.Collect();
+            } 
+            catch (IndexOutOfRangeException) {} 
+            catch (NullReferenceException) {}
+        }
+
+        // Colore um quadrado na posição (i, j)
         private void PaintImageSquare(int i, int j) {
-            int r, g, b, xPos, yPos;
+            int r, g, b, yPos, xPos;
             Color c;
             for(int y = 1; y < gridSize * zoom; y++) {
                 for (int x = 1; x < gridSize * zoom; x++) {
-                    xPos = i * gridSize * zoom + x;
-                    yPos = j * gridSize * zoom + y;
-                    r = zoomImage.GetPixel(yPos, xPos).R;
-                    g = zoomImage.GetPixel(yPos, xPos).G;
-                    b = zoomImage.GetPixel(yPos, xPos).B;
+                    xPos = j * gridSize * zoom + y;
+                    yPos = i * gridSize * zoom + x;
+                    r = zoomImage.GetPixel(xPos, yPos).R;
+                    g = zoomImage.GetPixel(xPos, yPos).G;
+                    b = zoomImage.GetPixel(xPos, yPos).B;
                     switch (mat[i,j]) {
                         case 0: // Indefinido - Não muda a cor
-                            c = zoomImage.GetPixel(yPos, xPos);
-                            ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
+                            c = zoomImage.GetPixel(xPos, yPos);
+                            ((Bitmap)picBoxImage.Image).SetPixel(xPos, yPos, c);
                             break;
                         case 1: // Plantação - Verde
                             c = Color.FromArgb(255, Math.Max(r - decreaseRatio , 0) , Math.Min(g + increaseRatio, 255), Math.Max(b - decreaseRatio, 0));
-                            ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
+                            ((Bitmap)picBoxImage.Image).SetPixel(xPos, yPos, c);
                             break;
                         case 2: // Ambos - Amarelo
                             c = Color.FromArgb(255, Math.Min(r + increaseRatio, 255), Math.Min(g + increaseRatio, 255), Math.Max(b - decreaseRatio, 0));
-                            ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
+                            ((Bitmap)picBoxImage.Image).SetPixel(xPos, yPos, c);
                             break;
                         case 3: // Não plantação - Vermelho
                             c = Color.FromArgb(255, Math.Min(r + increaseRatio, 255), Math.Max(g - decreaseRatio, 0), Math.Max(b - decreaseRatio, 0));
-                            ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
+                            ((Bitmap)picBoxImage.Image).SetPixel(xPos, yPos, c);
                             break;
                         default: // Apenas valores do preset são suportados
-                            MessageBox.Show("Valor inválido na matriz de dados na posição [" + i + "," + j + "]");
+                            MessageBox.Show("Valor inválido na matriz de dados na posição [" + i + "," + j + "]: " + mat[i,j]);
                             break;
                     }
                 }
@@ -123,7 +148,7 @@ namespace Ground_Truth {
             picBoxImage.Refresh();
         }
 
-        // Color a imagem entre dois pontos
+        // Colore a imagem entre dois pontos
         private void PaintImageRectangle(int i0, int j0, int i1, int j1) {
             int r, g, b, xPos, yPos;
             Color c;
@@ -222,8 +247,7 @@ namespace Ground_Truth {
                 w = mainImage.Width - (mainImage.Width % gridSize); //calcula a nova largura da imagem
                 h = mainImage.Height - (mainImage.Height % gridSize); //calcula a nova altura da imagem
             }
-            /*
-             * Se o tamanho da imagem original for do mesmo 
+            /* Se o tamanho da imagem original for do mesmo 
              * tamanho da imagem redimensionada calculada, 
              * não é necessário redimensionar a imagem
              */
@@ -323,11 +347,13 @@ namespace Ground_Truth {
             DrawGrid();
         }
 
+        // Quando o zoom é alterado
         private void ComboBox1_SelectedIndexChanged(object sender, EventArgs e) {
             zoom = Convert.ToInt32(Convert.ToString(cbZoom.Text[0]));
             ReloadImage();
         }
 
+        // Recarrega a imagem
         private void ReloadImage() {
             zoomImage = mainImage;
             zoomSize = new Size((int)(w * zoom), (int)(h * zoom));
@@ -341,6 +367,7 @@ namespace Ground_Truth {
             DrawGrid();
         }
 
+        // Action listener do botão de salvar
         private void BtnSalvar_Click(object sender, EventArgs e) {
             if(picBoxImage.Image == null) {
                 MessageBox.Show("Imagem inválida");
@@ -358,10 +385,11 @@ namespace Ground_Truth {
             MessageBox.Show("Imagem salva com sucesso em \"" + imagefile + "\"");
         }
 
+        // Salva a matriz em disco
         private void SaveMatrix() {
             if(mat == null || datfile == null) {
                 StartMatrix();
-                MessageBox.Show("A matriz era nula, criando uma nova matriz");
+                MessageBox.Show("Não foi encontrado uma matriz de dados, criando uma nova matriz");
             }
 
             using (StreamWriter writeText = new StreamWriter(datfile)) {
@@ -381,7 +409,7 @@ namespace Ground_Truth {
         private bool UpdateMatrix(int value, int x, int y) {
             if (mat == null || datfile == null) {
                 StartMatrix();
-                MessageBox.Show("A matriz era nula, criando uma nova matriz");
+                MessageBox.Show("Não foi encontrado uma matriz de dados, criando uma nova matriz");
             }
 
             mat[x, y] = value;
@@ -404,8 +432,7 @@ namespace Ground_Truth {
             return true; // Retorna true se finalizar a execução com sucesso
         }
 
-        /*
-         * Inicializa a matriz com os valores do arquivo
+        /* Inicializa a matriz com os valores do arquivo
          * de dados, caso o arquivo não exista, cria-se 
          * um novo arquivo com a matriz completamente zerada
          * 
@@ -458,11 +485,6 @@ namespace Ground_Truth {
             return exists;
         }
 
-        private void Swap(int i, int j) {
-            int aux;
-            aux = i;
-            i = j;
-            j = aux;
-        }
+        private void Swap(int i, int j) {int aux;aux = i;i = j;j = aux;}
     }    
 }
