@@ -29,16 +29,24 @@ namespace Ground_Truth {
             this.txtDirectory = new System.Windows.Forms.TextBox();
             this.btnSearch = new System.Windows.Forms.Button();
             this.btnOpen = new System.Windows.Forms.Button();
-            this.openFileDialog1 = new System.Windows.Forms.OpenFileDialog();
+            this.openFileDialogImg = new System.Windows.Forms.OpenFileDialog();
             this.picBoxImage = new System.Windows.Forms.PictureBox();
             this.panel1 = new System.Windows.Forms.Panel();
             this.cbGridSize = new System.Windows.Forms.ComboBox();
             this.label1 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.cbZoom = new System.Windows.Forms.ComboBox();
-            this.btnSalvar = new System.Windows.Forms.Button();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.menuStrip2 = new System.Windows.Forms.MenuStrip();
+            this.toolsToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuComparar = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuAtivar = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuDesativar = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuSalvarImagem = new System.Windows.Forms.ToolStripMenuItem();
+            this.openFileDialogClf = new System.Windows.Forms.OpenFileDialog();
             ((System.ComponentModel.ISupportInitialize)(this.picBoxImage)).BeginInit();
             this.panel1.SuspendLayout();
+            this.menuStrip2.SuspendLayout();
             this.SuspendLayout();
             // 
             // txtDirectory
@@ -47,14 +55,14 @@ namespace Ground_Truth {
             | System.Windows.Forms.AnchorStyles.Right)));
             this.txtDirectory.Location = new System.Drawing.Point(12, 519);
             this.txtDirectory.Name = "txtDirectory";
-            this.txtDirectory.Size = new System.Drawing.Size(286, 22);
+            this.txtDirectory.Size = new System.Drawing.Size(350, 22);
             this.txtDirectory.TabIndex = 0;
             this.txtDirectory.Text = "C:\\";
             // 
             // btnSearch
             // 
             this.btnSearch.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSearch.Location = new System.Drawing.Point(304, 519);
+            this.btnSearch.Location = new System.Drawing.Point(368, 522);
             this.btnSearch.Name = "btnSearch";
             this.btnSearch.Size = new System.Drawing.Size(42, 23);
             this.btnSearch.TabIndex = 1;
@@ -65,7 +73,7 @@ namespace Ground_Truth {
             // btnOpen
             // 
             this.btnOpen.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnOpen.Location = new System.Drawing.Point(352, 519);
+            this.btnOpen.Location = new System.Drawing.Point(416, 522);
             this.btnOpen.Name = "btnOpen";
             this.btnOpen.Size = new System.Drawing.Size(59, 23);
             this.btnOpen.TabIndex = 2;
@@ -73,10 +81,10 @@ namespace Ground_Truth {
             this.btnOpen.UseVisualStyleBackColor = true;
             this.btnOpen.Click += new System.EventHandler(this.BtnOpen_Click);
             // 
-            // openFileDialog1
+            // openFileDialogImg
             // 
-            this.openFileDialog1.Filter = "Imagem JPG|*.jpg|Imagem PNG|*.png";
-            this.openFileDialog1.FileOk += new System.ComponentModel.CancelEventHandler(this.OpenFileDialog1_FileOk);
+            this.openFileDialogImg.Filter = "Imagem JPG|*.jpg|Imagem PNG|*.png";
+            this.openFileDialogImg.FileOk += new System.ComponentModel.CancelEventHandler(this.OpenFileDialogImg_FileOk);
             // 
             // picBoxImage
             // 
@@ -88,6 +96,7 @@ namespace Ground_Truth {
             this.picBoxImage.TabStop = false;
             this.picBoxImage.MouseDown += new System.Windows.Forms.MouseEventHandler(this.PictureBox1_MouseDown);
             this.picBoxImage.MouseMove += new System.Windows.Forms.MouseEventHandler(this.PictureBox1_MouseMove);
+            this.picBoxImage.MouseUp += new System.Windows.Forms.MouseEventHandler(this.PictureBox1_Mouse_up);
             // 
             // panel1
             // 
@@ -96,9 +105,9 @@ namespace Ground_Truth {
             | System.Windows.Forms.AnchorStyles.Right)));
             this.panel1.AutoScroll = true;
             this.panel1.Controls.Add(this.picBoxImage);
-            this.panel1.Location = new System.Drawing.Point(12, 12);
+            this.panel1.Location = new System.Drawing.Point(12, 41);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(758, 501);
+            this.panel1.Size = new System.Drawing.Size(758, 472);
             this.panel1.TabIndex = 7;
             // 
             // cbGridSize
@@ -153,24 +162,82 @@ namespace Ground_Truth {
             this.cbZoom.Text = "1x";
             this.cbZoom.SelectedIndexChanged += new System.EventHandler(this.ComboBox1_SelectedIndexChanged);
             // 
-            // btnSalvar
+            // menuStrip1
             // 
-            this.btnSalvar.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Right)));
-            this.btnSalvar.Enabled = false;
-            this.btnSalvar.Location = new System.Drawing.Point(414, 519);
-            this.btnSalvar.Name = "btnSalvar";
-            this.btnSalvar.Size = new System.Drawing.Size(61, 23);
-            this.btnSalvar.TabIndex = 3;
-            this.btnSalvar.Text = "Salvar";
-            this.btnSalvar.UseVisualStyleBackColor = true;
-            this.btnSalvar.Click += new System.EventHandler(this.BtnSalvar_Click);
+            this.menuStrip1.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.menuStrip1.Location = new System.Drawing.Point(0, 28);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(782, 24);
+            this.menuStrip1.TabIndex = 11;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // menuStrip2
+            // 
+            this.menuStrip2.ImageScalingSize = new System.Drawing.Size(20, 20);
+            this.menuStrip2.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.toolsToolStripMenuItem});
+            this.menuStrip2.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip2.Name = "menuStrip2";
+            this.menuStrip2.Size = new System.Drawing.Size(782, 28);
+            this.menuStrip2.TabIndex = 12;
+            this.menuStrip2.Text = "menuStrip2";
+            // 
+            // toolsToolStripMenuItem
+            // 
+            this.toolsToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuComparar,
+            this.menuSalvarImagem});
+            this.toolsToolStripMenuItem.Name = "toolsToolStripMenuItem";
+            this.toolsToolStripMenuItem.Size = new System.Drawing.Size(102, 24);
+            this.toolsToolStripMenuItem.Text = "Ferramentas";
+            // 
+            // menuComparar
+            // 
+            this.menuComparar.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.menuComparar.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.menuAtivar,
+            this.menuDesativar});
+            this.menuComparar.Enabled = false;
+            this.menuComparar.Name = "menuComparar";
+            this.menuComparar.ShowShortcutKeys = false;
+            this.menuComparar.Size = new System.Drawing.Size(234, 26);
+            this.menuComparar.Text = "Comparar classificações";
+            // 
+            // menuAtivar
+            // 
+            this.menuAtivar.Name = "menuAtivar";
+            this.menuAtivar.ShowShortcutKeys = false;
+            this.menuAtivar.Size = new System.Drawing.Size(146, 26);
+            this.menuAtivar.Text = "Ativar";
+            this.menuAtivar.Click += new System.EventHandler(this.MenuAtivar_Click);
+            // 
+            // menuDesativar
+            // 
+            this.menuDesativar.Enabled = false;
+            this.menuDesativar.Name = "menuDesativar";
+            this.menuDesativar.Size = new System.Drawing.Size(146, 26);
+            this.menuDesativar.Text = "Desativar";
+            this.menuDesativar.Click += new System.EventHandler(this.MenuDesativar_Click);
+            // 
+            // menuSalvarImagem
+            // 
+            this.menuSalvarImagem.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
+            this.menuSalvarImagem.Enabled = false;
+            this.menuSalvarImagem.Name = "menuSalvarImagem";
+            this.menuSalvarImagem.Size = new System.Drawing.Size(234, 26);
+            this.menuSalvarImagem.Text = "Exportar JPG";
+            this.menuSalvarImagem.Click += new System.EventHandler(this.SalvarImagemToolStripMenuItem_Click);
+            // 
+            // openFileDialogClf
+            // 
+            this.openFileDialogClf.Filter = "Arquivo de dados|*.dat";
+            this.openFileDialogClf.FileOk += new System.ComponentModel.CancelEventHandler(this.OpenFileDialogClf_FileOk);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(782, 553);
-            this.Controls.Add(this.btnSalvar);
             this.Controls.Add(this.cbZoom);
             this.Controls.Add(this.label2);
             this.Controls.Add(this.label1);
@@ -179,12 +246,17 @@ namespace Ground_Truth {
             this.Controls.Add(this.btnOpen);
             this.Controls.Add(this.btnSearch);
             this.Controls.Add(this.txtDirectory);
+            this.Controls.Add(this.menuStrip1);
+            this.Controls.Add(this.menuStrip2);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
+            this.MainMenuStrip = this.menuStrip1;
             this.Name = "Form1";
             this.Text = "Ground Truth";
             ((System.ComponentModel.ISupportInitialize)(this.picBoxImage)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
+            this.menuStrip2.ResumeLayout(false);
+            this.menuStrip2.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -195,14 +267,21 @@ namespace Ground_Truth {
         private System.Windows.Forms.TextBox txtDirectory;
         private System.Windows.Forms.Button btnSearch;
         private System.Windows.Forms.Button btnOpen;
-        private System.Windows.Forms.OpenFileDialog openFileDialog1;
+        private System.Windows.Forms.OpenFileDialog openFileDialogImg;
         private System.Windows.Forms.PictureBox picBoxImage;
         private System.Windows.Forms.Panel panel1;
         private System.Windows.Forms.ComboBox cbGridSize;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox cbZoom;
-        private System.Windows.Forms.Button btnSalvar;
+        private System.Windows.Forms.MenuStrip menuStrip1;
+        private System.Windows.Forms.MenuStrip menuStrip2;
+        private System.Windows.Forms.ToolStripMenuItem toolsToolStripMenuItem;
+        private System.Windows.Forms.ToolStripMenuItem menuComparar;
+        private System.Windows.Forms.ToolStripMenuItem menuSalvarImagem;
+        private System.Windows.Forms.OpenFileDialog openFileDialogClf;
+        private System.Windows.Forms.ToolStripMenuItem menuAtivar;
+        private System.Windows.Forms.ToolStripMenuItem menuDesativar;
     }
 }
 

@@ -13,10 +13,10 @@ namespace Ground_Truth {
         int zoom = 1; // 1 = Default
         int w, h; // Width, Height - Dimensões da imagem redimensionada
         string file; // Diretório da imagem
-        string read; // Linha lida do arquivo
+        string dat_file; // Em caso de comparação de arquivos dat, aqui vai ser o endereço do arquivo *.dat
         Size zoomSize; // Tamanho da imagem redimensionada
         Graphics g;
-        int increaseRatio = 80, decreaseRatio = 80; // increaseRatio / decreaseRatio - Taxa de alteração de cor
+        int increaseRatio = 155, decreaseRatio = 155; // increaseRatio / decreaseRatio - Taxa de alteração de cor
 
         bool ctrl_pressed = false; // Usado para colorir um retângulo grande
         int color_dragging = 0; // Decide a cor que vai ser colorida quando clicar e arrastar
@@ -33,6 +33,8 @@ namespace Ground_Truth {
          */
         int[,] mat;
         int isize, jsize; // Dimensões da matriz
+
+        int[,] dat; // Matriz para comparação de consistência de classificação entre dois .dat distintos
 
         /* Formato do arquivo:
          * Linha 1 isize // altura da matriz
@@ -52,37 +54,40 @@ namespace Ground_Truth {
             oldMouseLocation = e.Location;
             try {
                 int i = (int)(e.Y / (gridSize * zoom)), j = (int)(e.X / (gridSize * zoom));
+                if (menuComparar.Checked && mat[i,j] == dat[i,j] && ((Bitmap)picBoxImage.Image).GetPixel(j * zoom * gridSize + 2, i * zoom * gridSize + 2) == Color.FromArgb(255, 0, 0 , 0))
+                    return;
                 oldSquare.X = j;
                 oldSquare.Y = i;
                 if (e.Button == MouseButtons.Left) // Se o clique for com o botão esquerdo, troca a cor pra frente
-                    mat[i, j] = (mat[i, j] + 1) % 4;
+                    mat[i, j] = (1 + mat[i, j]) % 4;
                 else if (e.Button == MouseButtons.Right) // Se o clique for com o botão direito, troca a cor pra trás
                     mat[i, j] = (3 + mat[i,j]) % 4;
-                color_dragging = Math.Abs(mat[i, j]);
+                color_dragging = mat[i, j];
 
                 if (Control.ModifierKeys == Keys.Control && !ctrl_pressed) {
                     ctrl_pressed = true;
                     first = new Point(j, i);
                     PaintImageSquare(i, j);
-                    UpdateMatrix(mat[i, j], i, j);
                 } else if (Control.ModifierKeys == Keys.Control && ctrl_pressed) {
                     for (int y = Math.Min(first.Y, i); y <= Math.Min(first.Y, i) + Math.Abs(first.Y - i); y++) {
                         for (int x = Math.Min(first.X, j); x <= Math.Min(first.X, j) + Math.Abs(first.X - j); x++) {
                             mat[y, x] = mat[first.Y, first.X];
                         }
                     }
-                    SaveMatrix();
                     PaintImageRectangle(Math.Min(first.Y, i), Math.Min(first.X, j), Math.Max(i, first.Y), Math.Max(j, first.X));
                     ctrl_pressed = false;
                 } else {
                     ctrl_pressed = false;
                     PaintImageSquare(i, j);
-                    UpdateMatrix(mat[i, j], i, j);
                 }
                 GC.Collect();
             }
-            catch (IndexOutOfRangeException) {} 
-            catch (NullReferenceException) {}
+            catch (IndexOutOfRangeException ex) {
+                Console.WriteLine(ex.StackTrace);
+            } 
+            catch (NullReferenceException ex) {
+                Console.WriteLine(ex.StackTrace);
+            }
         }
 
         // Tratador do evento de clicar e arrastar na imagem
@@ -98,7 +103,6 @@ namespace Ground_Truth {
                     mat[i, j] = color_dragging;
 
                     PaintImageSquare(i, j);
-                    UpdateMatrix(mat[i,j], i, j);
 
                     oldSquare.X = j;
                     oldSquare.Y = i;
@@ -111,14 +115,18 @@ namespace Ground_Truth {
             catch (NullReferenceException) {}
         }
 
+        private void PictureBox1_Mouse_up(object sender, MouseEventArgs e) {
+            SaveMatrix();
+        }
+
         // Colore um quadrado na posição (i, j)
         private void PaintImageSquare(int i, int j) {
             int r, g, b, yPos, xPos;
             Color c;
             for(int y = 1; y < gridSize * zoom; y++) {
                 for (int x = 1; x < gridSize * zoom; x++) {
-                    xPos = j * gridSize * zoom + y;
-                    yPos = i * gridSize * zoom + x;
+                    xPos = j * gridSize * zoom + x;
+                    yPos = i * gridSize * zoom + y;
                     r = zoomImage.GetPixel(xPos, yPos).R;
                     g = zoomImage.GetPixel(xPos, yPos).G;
                     b = zoomImage.GetPixel(xPos, yPos).B;
@@ -182,7 +190,7 @@ namespace Ground_Truth {
                             ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
                             break;
                         default: // Apenas valores do preset são suportados
-                            MessageBox.Show("Valor inválido na matriz de dados na posição [" + i0 + "," + j0 + "]");
+                            MessageBox.Show("Valor inválido na matriz de dados na posição [" + i0 + "," + j0 + "]: " + mat[i0,j0]);
                             break;
                     }
                 }
@@ -191,35 +199,52 @@ namespace Ground_Truth {
         }
 
         // Colore a imagem se existir o arquivo de dados
-        private void LoadColors() {
-            int r, g, b, xPos, yPos;
+        private void LoadColors(bool hardLoad) {
+            int r, g, b, yPos, xPos;
             Color c;
             for (int i = 0; i < isize; i++) { // Percorrendo a matriz
                 for(int j = 0; j < jsize; j++) { 
-                    if(mat[i,j] != 0) { // Só colore o quadrado se necessário
-                        for(int y = 0; y < gridSize * zoom; y++) { // Percorrendo os pixels da imagem
-                            for (int x = 0; x < gridSize * zoom; x++) {
-                                xPos = i * gridSize * zoom + x;
-                                yPos = j * gridSize * zoom + y;
-                                r = zoomImage.GetPixel(yPos, xPos).R;
-                                g = zoomImage.GetPixel(yPos, xPos).G;
-                                b = zoomImage.GetPixel(yPos, xPos).B;
-                                switch (mat[i,j]) {
-                                    case 1: // Plantação - Verde
-                                        c = Color.FromArgb(255, Math.Max(r - decreaseRatio, 0), Math.Min(g + increaseRatio, 255), Math.Max(b - decreaseRatio, 0));
-                                        ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
-                                        break;
-                                    case 2: // Ambos - Amarelo
-                                        c = Color.FromArgb(255, Math.Min(r + increaseRatio, 255), Math.Min(g + increaseRatio, 255), Math.Max(b - decreaseRatio, 0));
-                                        ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
-                                        break;
-                                    case 3: // Não plantação - Vermelho
-                                        c = Color.FromArgb(255, Math.Min(r + increaseRatio, 255), Math.Max(g - decreaseRatio, 0), Math.Max(b - decreaseRatio, 0));
-                                        ((Bitmap)picBoxImage.Image).SetPixel(yPos, xPos, c);
-                                        break;
-                                    default:
-                                        MessageBox.Show("Valor inválido na matriz de dados na posição [" + i + "," + j + "]");
-                                        break;
+                    if (menuComparar.Checked) {
+                        if (mat[i, j] == dat[i, j] || mat[i, j] == 0 || dat[i, j] == 0) {
+                            for (int y = 0; y < gridSize * zoom; y++) {
+                                for (int x = 0; x < gridSize * zoom; x++) {
+                                    xPos = j * gridSize * zoom + x;
+                                    yPos = i * gridSize * zoom + y;
+                                    ((Bitmap)picBoxImage.Image).SetPixel(xPos, yPos, Color.Black);
+                                }
+                            }
+                        }
+                    } else {
+                        if (mat[i, j] != 0 || hardLoad) { // Só colore o quadrado se necessário
+                            for (int y = 0; y < gridSize * zoom; y++) {
+                                for (int x = 0; x < gridSize * zoom; x++) {
+                                    xPos = j * gridSize * zoom + x;
+                                    yPos = i * gridSize * zoom + y;
+                                    r = zoomImage.GetPixel(xPos, yPos).R;
+                                    g = zoomImage.GetPixel(xPos, yPos).G;
+                                    b = zoomImage.GetPixel(xPos, yPos).B;
+
+                                    switch (mat[i, j]) {
+                                        case 0:
+                                            c = Color.FromArgb(255, r, g, b);
+                                            ((Bitmap)picBoxImage.Image).SetPixel(xPos, yPos, c);
+                                            break;
+                                        case 1: // Plantação - Verde
+                                            c = Color.FromArgb(255, Math.Max(r - decreaseRatio, 0), Math.Min(g + increaseRatio, 255), Math.Max(b - decreaseRatio, 0));
+                                            ((Bitmap)picBoxImage.Image).SetPixel(xPos, yPos, c);
+                                            break;
+                                        case 2: // Ambos - Amarelo
+                                            c = Color.FromArgb(255, Math.Min(r + increaseRatio, 255), Math.Min(g + increaseRatio, 255), Math.Max(b - decreaseRatio, 0));
+                                            ((Bitmap)picBoxImage.Image).SetPixel(xPos, yPos, c);
+                                            break;
+                                        case 3: // Não plantação - Vermelho
+                                            c = Color.FromArgb(255, Math.Min(r + increaseRatio, 255), Math.Max(g - decreaseRatio, 0), Math.Max(b - decreaseRatio, 0));
+                                            ((Bitmap)picBoxImage.Image).SetPixel(xPos, yPos, c);
+                                            break;
+                                        default:
+                                            MessageBox.Show("Valor inválido na matriz de dados na posição [" + i + "," + j + "]: " + mat[i,j]);
+                                            break;
+                                    }
                                 }
                             }
                         }
@@ -230,9 +255,9 @@ namespace Ground_Truth {
             GC.Collect();
         }
 
-        //Função chamada quando é clicado OK na janela de diálogo de abrir o arquivo
-        private void OpenFileDialog1_FileOk(object sender, CancelEventArgs e) {
-            file = openFileDialog1.FileName; // atribuindo a localização da imagem
+        //Tratador do OK na janela de diálogo de abrir a imagem
+        private void OpenFileDialogImg_FileOk(object sender, CancelEventArgs e) {
+            file = openFileDialogImg.FileName; // atribuindo a localização da imagem
             mainImage = new Bitmap(Image.FromFile(file));
             zoomImage = mainImage;
             zoomSize = mainImage.Size;
@@ -260,17 +285,56 @@ namespace Ground_Truth {
 
             cbGridSize.Enabled = true;
             cbZoom.Enabled = true;
-            btnSalvar.Enabled = true;
+            menuSalvarImagem.Enabled = true;
+            menuComparar.Enabled = true;
             if(StartMatrix())
-                LoadColors(); // Colore a imagem conforme a matriz de dados
+                LoadColors(false); // Colore a imagem conforme a matriz de dados
             DrawGrid();
+        }
+
+        //Tratador do OK na janela de diálogo de abrir o arquivo
+        private void OpenFileDialogClf_FileOk(object sender, CancelEventArgs e) {
+            dat_file = openFileDialogClf.FileName;
+            LoadDat();
+            cbGridSize.Enabled = false;
+            menuComparar.Checked = true;
+            menuAtivar.Enabled = true;
+            Cursor.Current = Cursors.WaitCursor;
+            LoadColors(false);
+            DrawGrid();
+            Cursor.Current = Cursors.Arrow;
         }
 
         //Tratador de eventos de quando clica no botão "..."
         private void BtnSearch_Click(object sender, EventArgs e) {
-            if (openFileDialog1.ShowDialog() == DialogResult.OK) {
-                txtDirectory.Text = openFileDialog1.FileName;
+            if (openFileDialogImg.ShowDialog() == DialogResult.OK) {
+                txtDirectory.Text = openFileDialogImg.FileName;
             }
+        }
+
+        // Ação de comprar dois arquivos de classificação
+        private void MenuAtivar_Click(object sender, EventArgs e) {
+            if (openFileDialogClf.ShowDialog() == DialogResult.OK) {
+                menuDesativar.Enabled = true;
+                menuComparar.Checked = true;
+                menuAtivar.Enabled = false;
+                btnSearch.Enabled = false;
+                btnOpen.Enabled = false;
+            }
+        }
+
+        // Ação de desativar a comparação entre dois arquivos de classificação
+        private void MenuDesativar_Click(object sender, EventArgs e) {
+            menuDesativar.Enabled = false;
+            menuComparar.Checked = false;
+            menuAtivar.Enabled = true;
+            btnSearch.Enabled = true;
+            btnOpen.Enabled = true;
+            cbGridSize.Enabled = true;
+            Cursor.Current = Cursors.WaitCursor;
+            LoadColors(true);
+            DrawGrid();
+            Cursor.Current = Cursors.Arrow;
         }
 
         //Tratador de eventos de quando clica no botão "Abrir"
@@ -296,9 +360,10 @@ namespace Ground_Truth {
                 GC.Collect(); //Garbage collector
                 cbGridSize.Enabled = true;
                 cbZoom.Enabled = true;
-                btnSalvar.Enabled = true;
+                menuSalvarImagem.Enabled = true;
+                menuComparar.Enabled = true;
                 if (StartMatrix())
-                    LoadColors();
+                    LoadColors(false);
                 DrawGrid();
             } catch (System.IO.FileNotFoundException) { //Exceção de quando não é possível encontrar o arquivo
                 MessageBox.Show("Não foi possível localizar o arquivo " + txtDirectory.Text);
@@ -343,7 +408,7 @@ namespace Ground_Truth {
                 picBoxImage.Image = new Bitmap(CropImage(mainImage, new Rectangle(0, 0, w, h)));
 
             if (StartMatrix())
-                LoadColors();
+                LoadColors(false);
             DrawGrid();
         }
 
@@ -363,26 +428,8 @@ namespace Ground_Truth {
             picBoxImage.Image = zoomImage;
             picBoxImage.Size = zoomSize;
             GC.Collect();
-            LoadColors();
+            LoadColors(false);
             DrawGrid();
-        }
-
-        // Action listener do botão de salvar
-        private void BtnSalvar_Click(object sender, EventArgs e) {
-            if(picBoxImage.Image == null) {
-                MessageBox.Show("Imagem inválida");
-                return;
-            }
-
-            imagefile = file.Substring(0, file.Length - 4) + "_" + gridSize.ToString() + ".jpg";
-
-            if(File.Exists(imagefile)) {
-                File.Delete(imagefile);
-            }
-
-            picBoxImage.Image.Save(imagefile);
-
-            MessageBox.Show("Imagem salva com sucesso em \"" + imagefile + "\"");
         }
 
         // Salva a matriz em disco
@@ -403,6 +450,24 @@ namespace Ground_Truth {
                 }
             }
              
+        }
+
+        // Ação de salvar em disco a imagem classificada
+        private void SalvarImagemToolStripMenuItem_Click(object sender, EventArgs e) {
+            if (picBoxImage.Image == null) {
+                MessageBox.Show("Imagem inválida");
+                return;
+            }
+
+            imagefile = file.Substring(0, file.Length - 4) + "_" + gridSize.ToString() + ".jpg";
+
+            if (File.Exists(imagefile)) {
+                File.Delete(imagefile);
+            }
+
+            picBoxImage.Image.Save(imagefile);
+
+            MessageBox.Show("Imagem salva com sucesso em \"" + imagefile + "\"");
         }
 
         // Atualiza a matriz no disco
@@ -431,7 +496,7 @@ namespace Ground_Truth {
             }
             return true; // Retorna true se finalizar a execução com sucesso
         }
-
+        
         /* Inicializa a matriz com os valores do arquivo
          * de dados, caso o arquivo não exista, cria-se 
          * um novo arquivo com a matriz completamente zerada
@@ -462,6 +527,7 @@ namespace Ground_Truth {
                     isize = Convert.ToInt32(readText.ReadLine());
                     jsize = Convert.ToInt32(readText.ReadLine());
                     mat = new int[isize, jsize];
+                    string read;
                     for (int i = 0; i < isize; i++) {
                         read = readText.ReadLine();
                         for (int j = 0; j < jsize; j++) {
@@ -483,6 +549,26 @@ namespace Ground_Truth {
                 }
             }
             return exists;
+        }
+
+        private void LoadDat() {
+            // Abrir o arquivo file
+            using (StreamReader read = new StreamReader(dat_file)) {
+                // Ler tamanho i e j e comparar se são iguais ao da imagem atual
+                if(Convert.ToInt32(read.ReadLine()) != isize || Convert.ToInt32(read.ReadLine()) != jsize) {
+                    MessageBox.Show("A matriz do arquivo de dados é de tamanho diferente da matriz atual");
+                    return;
+                }
+                dat = new int[isize, jsize];
+                string r;
+                // Para cada valor do arquivo, atribuir para a matriz
+                for(int i = 0; i < isize; i++) {
+                    r = read.ReadLine();
+                    for(int j = 0; j < jsize; j++) {
+                        dat[i, j] = r[j] - 48;
+                    }
+                }
+            }
         }
 
         private void Swap(int i, int j) {int aux;aux = i;i = j;j = aux;}
